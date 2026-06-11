@@ -14,13 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $icon = sanitize($_POST['icon'] ?? '🍴');
         
         $stmt = $db->prepare("INSERT INTO categories (name, description, icon, is_active) VALUES (?, ?, ?, 1)");
-        $stmt->bind_param("sss", $name, $description, $icon);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$name, $description, $icon])) {
             flash('success', 'Kategori baru berhasil ditambahkan!');
         } else {
             flash('error', 'Gagal menambahkan kategori.');
         }
-        $stmt->close();
         redirect(BASE_URL . '/views/admin/categories.php');
     }
 
@@ -32,19 +30,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_active = isset($_POST['is_active']) ? 1 : 0;
         
         $stmt = $db->prepare("UPDATE categories SET name = ?, description = ?, icon = ?, is_active = ? WHERE id = ?");
-        $stmt->bind_param("sssii", $name, $description, $icon, $is_active, $id);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$name, $description, $icon, $is_active, $id])) {
             flash('success', 'Kategori berhasil diperbarui!');
         } else {
             flash('error', 'Gagal memperbarui kategori.');
         }
-        $stmt->close();
         redirect(BASE_URL . '/views/admin/categories.php');
     }
 }
 
 // Fetch all categories
-$categories = $db->query("SELECT * FROM categories ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
+$catq = $db->query("SELECT * FROM categories ORDER BY id DESC");
+$categories = $catq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Kelola Kategori';
 $role  = 'admin';

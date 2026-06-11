@@ -5,7 +5,9 @@ requireRole('buyer');
 $db = getDB();
 $user = currentUser();
 
-$cart_items = $db->query("SELECT c.*, p.name as pname, p.price, p.image, p.stock, r.name as resto_name, r.id as resto_id FROM cart c JOIN products p ON c.product_id = p.id JOIN restaurants r ON p.restaurant_id = r.id WHERE c.user_id = {$user['id']}")->fetch_all(MYSQLI_ASSOC);
+$cq = $db->prepare("SELECT c.*, p.name as pname, p.price, p.image, p.stock, r.name as resto_name, r.id as resto_id FROM cart c JOIN products p ON c.product_id = p.id JOIN restaurants r ON p.restaurant_id = r.id WHERE c.user_id = ?");
+$cq->execute([$user['id']]);
+$cart_items = $cq->fetchAll(PDO::FETCH_ASSOC);
 
 $subtotal = 0;
 foreach ($cart_items as $item) {

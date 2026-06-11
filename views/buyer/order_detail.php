@@ -7,11 +7,13 @@ $user = currentUser();
 $order_id = (int)($_GET['id'] ?? 0);
 
 // Fetch order
-$order = $db->query("SELECT o.*, r.name as resto_name, r.address as resto_addr, r.phone as resto_phone, d.name as driver_name, d.phone as driver_phone
+$soq = $db->prepare("SELECT o.*, r.name as resto_name, r.address as resto_addr, r.phone as resto_phone, d.name as driver_name, d.phone as driver_phone
     FROM orders o
     JOIN restaurants r ON o.restaurant_id = r.id
     LEFT JOIN users d ON o.driver_id = d.id
-    WHERE o.id = $order_id")->fetch_assoc();
+    WHERE o.id = ?");
+$soq->execute([$order_id]);
+$order = $soq->fetch(PDO::FETCH_ASSOC);
 
 if (!$order) {
     flash('error', 'Pesanan tidak ditemukan.');
@@ -28,13 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (!empty($_FILES['proof']['name'])) {
         $proof = uploadFile($_FILES['proof'], 'payments');
         if ($proof) {
-            $db->query("UPDATE payments SET proof = '$proof', status = 'pending' WHERE order_id = $order_id");
-            
-            // Insert status tracking
-            $stmt = $db->prepare("INSERT INTO order_tracking (order_id, status, description, changed_by) VALUES (?, ?, 'Bukti pembayaran diunggah oleh pembeli', ?)");
-            $stmt->bind_param("ii", $order_id, $user['id']);
-            $stmt->execute();
-            $stmt->close();
+            $up = $db->prepare("UPDATE payments SET proof = ?, status = 'pending' WHERE order_id = ?");
+            $up->execute([$proof, $order_id]);
+
+            $stmt = $db->prepare("INSERT INTO order_tracking (order_id, status, description, changed_by) VALUES (?, 'pending', 'Bukti pembayaran diunggah oleh pembeli', ?)");
+            $stmt->execute([$order_id, $user['id']]);
             
             flash('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi admin.');
         } else {
@@ -47,19 +47,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // Fetch items
-$items = $db->query("SELECT oi.*, p.name as pname, p.image FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = $order_id")->fetch_all(MYSQLI_ASSOC);
+$siq = $db->prepare("SELECT oi.*, p.name as pname, p.image FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?");
+$siq->execute([$order_id]);
+$items = $siq->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch address
-$address = $db->query("SELECT * FROM buyer_addresses WHERE id = {$order['address_id']}")->fetch_assoc();
+$saa = $db->prepare("SELECT * FROM buyer_addresses WHERE id = ?");
+$saa->execute([$order['address_id']]);
+$address = $saa->fetch(PDO::FETCH_ASSOC);
 
-// Fetch payment
-$payment = $db->query("SELECT * FROM payments WHERE order_id = $order_id")->fetch_assoc();
+$spa = $db->prepare("SELECT * FROM payments WHERE order_id = ?");
+$spa->execute([$order_id]);
+$payment = $spa->fetch(PDO::FETCH_ASSOC);
 
 // Fetch tracking logs
-$tracking = $db->query("SELECT * FROM order_tracking WHERE order_id = $order_id ORDER BY created_at DESC")->fetch_all(MYSQLI_ASSOC);
+$stq = $db->prepare("SELECT * FROM order_tracking WHERE order_id = ? ORDER BY created_at DESC");
+$stq->execute([$order_id]);
+$tracking = $stq->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch reviewed products for this order
-$reviewed_res = $db->query("SELECT product_id FROM review WHERE order_id = $order_id AND user_id = {$user['id']}")->fetch_all(MYSQLI_ASSOC);
+$srq = $db->prepare("SELECT product_id FROM review WHERE order_id = ? AND user_id = ?");
+$srq->execute([$order_id, $user['id']]);
+$reviewed_res = $srq->fetchAll(PDO::FETCH_ASSOC);
 $reviewed_ids = array_column($reviewed_res, 'product_id');
 
 $title = 'Detail Pesanan #' . $order['order_code'];

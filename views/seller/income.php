@@ -6,7 +6,9 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch restaurant
-$resto = $db->query("SELECT * FROM restaurants WHERE seller_id = {$user['id']}")->fetch_assoc();
+$rq = $db->prepare("SELECT * FROM restaurants WHERE seller_id = ?");
+$rq->execute([$user['id']]);
+$resto = $rq->fetch(PDO::FETCH_ASSOC);
 
 if (!$resto) {
     flash('error', 'Silakan daftarkan restoran terlebih dahulu.');
@@ -16,16 +18,20 @@ if (!$resto) {
 $resto_id = $resto['id'];
 
 // Aggregate earnings
-$income_data = $db->query("SELECT SUM(total_amount) as total, COUNT(*) as c FROM orders WHERE restaurant_id = $resto_id AND status = 'delivered'")->fetch_assoc();
+$idq = $db->prepare("SELECT SUM(total_amount) as total, COUNT(*) as c FROM orders WHERE restaurant_id = ? AND status = 'delivered'");
+$idq->execute([$resto_id]);
+$income_data = $idq->fetch(PDO::FETCH_ASSOC);
 $total_income = $income_data['total'] ?? 0;
 $completed_orders = $income_data['c'] ?? 0;
 
 // Query income history (delivered orders)
-$history = $db->query("SELECT o.*, u.name as buyer_name 
+$hq = $db->prepare("SELECT o.*, u.name as buyer_name 
                        FROM orders o 
                        JOIN users u ON o.buyer_id = u.id 
-                       WHERE o.restaurant_id = $resto_id AND o.status = 'delivered' 
-                       ORDER BY o.id DESC")->fetch_all(MYSQLI_ASSOC);
+                       WHERE o.restaurant_id = ? AND o.status = 'delivered' 
+                       ORDER BY o.id DESC");
+$hq->execute([$resto_id]);
+$history = $hq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Laporan Pendapatan';
 $role  = 'seller';

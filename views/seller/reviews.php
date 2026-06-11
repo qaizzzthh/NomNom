@@ -6,7 +6,9 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch restaurant
-$resto = $db->query("SELECT * FROM restaurants WHERE seller_id = {$user['id']}")->fetch_assoc();
+$rq = $db->prepare("SELECT * FROM restaurants WHERE seller_id = ?");
+$rq->execute([$user['id']]);
+$resto = $rq->fetch(PDO::FETCH_ASSOC);
 
 if (!$resto) {
     flash('error', 'Silakan daftarkan restoran terlebih dahulu.');
@@ -16,12 +18,14 @@ if (!$resto) {
 $resto_id = $resto['id'];
 
 // Query reviews
-$reviews = $db->query("SELECT r.*, u.name as buyer_name, u.avatar as buyer_avatar, p.name as pname, p.image as pimage
+$rvq = $db->prepare("SELECT r.*, u.name as buyer_name, u.avatar as buyer_avatar, p.name as pname, p.image as pimage
                        FROM review r
                        JOIN users u ON r.user_id = u.id
                        JOIN products p ON r.product_id = p.id
-                       WHERE p.restaurant_id = $resto_id
-                       ORDER BY r.created_at DESC")->fetch_all(MYSQLI_ASSOC);
+                       WHERE p.restaurant_id = ?
+                       ORDER BY r.created_at DESC");
+$rvq->execute([$resto_id]);
+$reviews = $rvq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Review Menu';
 $role  = 'seller';

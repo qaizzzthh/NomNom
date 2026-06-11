@@ -1,8 +1,11 @@
 <?php
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'food_delivery');
+// ─── SUPABASE POSTGRESQL CONFIGURATION ───────────────
+define('DB_HOST', 'db.ggcgucplxtyzpsydbsrj.supabase.co');
+define('DB_PORT', '5432');
+define('DB_NAME', 'postgres');
+define('DB_USER', 'postgres');
+define('DB_PASS', '54iKBBmIuxULKN2q');
+
 // Dynamic BASE_URL detection
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? 80) == 443) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -13,7 +16,7 @@ if (!empty($docRoot) && strpos($projectRoot, $docRoot) === 0) {
     $relativePath = substr($projectRoot, strlen($docRoot));
     $baseUrl = $protocol . $host . '/' . trim($relativePath, '/');
 } else {
-    $baseUrl = $protocol . $host . '/UAS_INFO2425_202410715117_QAISY-AL-QATTHAN-JAKARIA';
+    $baseUrl = $protocol . $host . '/NomNom';
 }
 $baseUrl = rtrim($baseUrl, '/');
 define('BASE_URL', $baseUrl);
@@ -21,42 +24,50 @@ define('BASE_URL', $baseUrl);
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 define('APP_NAME', 'NomNom');
 
-function getDB() {
+function getDB(): PDO {
     static $conn = null;
     if ($conn === null) {
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-        if ($conn->connect_error) {
-            die(json_encode(['error' => 'Koneksi database gagal: ' . $conn->connect_error]));
+        $dsn = sprintf(
+            'pgsql:host=%s;port=%s;dbname=%s;sslmode=require',
+            DB_HOST, DB_PORT, DB_NAME
+        );
+        try {
+            $conn = new PDO($dsn, DB_USER, DB_PASS, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ]);
+        } catch (PDOException $e) {
+            die(json_encode(['error' => 'Koneksi database gagal: ' . $e->getMessage()]));
         }
-        $conn->set_charset('utf8mb4');
     }
     return $conn;
 }
 
-// Start session if not started
+// ─── SESSION ──────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Auth helpers
-function isLoggedIn() {
+// ─── AUTH HELPERS ─────────────────────────────────────
+function isLoggedIn(): bool {
     return isset($_SESSION['user_id']);
 }
 
-function currentUser() {
+function currentUser(): ?array {
     return $_SESSION['user'] ?? null;
 }
 
-function requireLogin() {
+function requireLogin(): void {
     if (!isLoggedIn()) {
         header('Location: ' . BASE_URL . '/views/public/login.php');
         exit;
     }
 }
 
-function requireRole(string|array $roles) {
+function requireRole(string|array $roles): void {
     requireLogin();
-    $user = currentUser();
+    $user  = currentUser();
     $roles = (array)$roles;
     if (!in_array($user['role'], $roles)) {
         header('Location: ' . BASE_URL . '/views/public/unauthorized.php');
@@ -64,18 +75,19 @@ function requireRole(string|array $roles) {
     }
 }
 
-function redirect($url) {
+function redirect(string $url): void {
     header("Location: $url");
     exit;
 }
 
-function sanitize($input) {
+function sanitize(string $input): string {
     return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }
 
-function flash($key, $msg = null) {
+function flash(string $key, ?string $msg = null): ?string {
     if ($msg !== null) {
         $_SESSION['flash'][$key] = $msg;
+        return null;
     } else {
         $val = $_SESSION['flash'][$key] ?? null;
         unset($_SESSION['flash'][$key]);
@@ -83,13 +95,13 @@ function flash($key, $msg = null) {
     }
 }
 
-function formatRupiah($amount) {
+function formatRupiah(float|int $amount): string {
     return 'Rp ' . number_format($amount, 0, ',', '.');
 }
 
-function timeAgo($datetime) {
-    $now = new DateTime();
-    $ago = new DateTime($datetime);
+function timeAgo(string $datetime): string {
+    $now  = new DateTime();
+    $ago  = new DateTime($datetime);
     $diff = $now->diff($ago);
     if ($diff->d > 0) return $diff->d . ' hari lalu';
     if ($diff->h > 0) return $diff->h . ' jam lalu';
@@ -97,17 +109,17 @@ function timeAgo($datetime) {
     return 'Baru saja';
 }
 
-function generateOrderCode() {
+function generateOrderCode(): string {
     return 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
 }
 
-function uploadFile($file, $folder = 'products') {
-    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+function uploadFile(array $file, string $folder = 'products'): string|false {
+    $allowed  = ['jpg', 'jpeg', 'png', 'webp'];
+    $ext      = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if (!in_array($ext, $allowed)) return false;
     if ($file['size'] > 5 * 1024 * 1024) return false;
     $filename = uniqid() . '_' . time() . '.' . $ext;
-    $path = UPLOAD_PATH . $folder . '/' . $filename;
+    $path     = UPLOAD_PATH . $folder . '/' . $filename;
     if (move_uploaded_file($file['tmp_name'], $path)) {
         return $folder . '/' . $filename;
     }

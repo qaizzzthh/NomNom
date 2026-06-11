@@ -16,25 +16,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $is_default = isset($_POST['is_default']) ? 1 : 0;
 
     if ($is_default) {
-        $db->query("UPDATE buyer_addresses SET is_default = 0 WHERE user_id = {$user['id']}");
+        $ud = $db->prepare("UPDATE buyer_addresses SET is_default = 0 WHERE user_id = ?");
+        $ud->execute([$user['id']]);
     }
 
     $stmt = $db->prepare("INSERT INTO buyer_addresses (user_id, label, recipient_name, phone, address, latitude, longitude, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isssssdi", $user['id'], $label, $recipient_name, $phone, $address, $lat, $lon, $is_default);
-    if ($stmt->execute()) {
+    if ($stmt->execute([$user['id'], $label, $recipient_name, $phone, $address, $lat, $lon, $is_default])) {
         flash('success', 'Alamat berhasil ditambahkan!');
     } else {
         flash('error', 'Gagal menambahkan alamat.');
     }
-    $stmt->close();
     redirect(BASE_URL . '/views/buyer/addresses.php');
 }
 
 // Handle set default
 if (isset($_GET['default_id'])) {
     $default_id = (int)$_GET['default_id'];
-    $db->query("UPDATE buyer_addresses SET is_default = 0 WHERE user_id = {$user['id']}");
-    $db->query("UPDATE buyer_addresses SET is_default = 1 WHERE id = $default_id AND user_id = {$user['id']}");
+    $ud1 = $db->prepare("UPDATE buyer_addresses SET is_default = 0 WHERE user_id = ?");
+    $ud1->execute([$user['id']]);
+    $ud2 = $db->prepare("UPDATE buyer_addresses SET is_default = 1 WHERE id = ? AND user_id = ?");
+    $ud2->execute([$default_id, $user['id']]);
     flash('success', 'Alamat utama berhasil diperbarui.');
     redirect(BASE_URL . '/views/buyer/addresses.php');
 }
@@ -42,13 +43,16 @@ if (isset($_GET['default_id'])) {
 // Handle delete
 if (isset($_GET['delete_id'])) {
     $delete_id = (int)$_GET['delete_id'];
-    $db->query("DELETE FROM buyer_addresses WHERE id = $delete_id AND user_id = {$user['id']}");
+    $del = $db->prepare("DELETE FROM buyer_addresses WHERE id = ? AND user_id = ?");
+    $del->execute([$delete_id, $user['id']]);
     flash('success', 'Alamat berhasil dihapus.');
     redirect(BASE_URL . '/views/buyer/addresses.php');
 }
 
 // Fetch all addresses
-$addresses = $db->query("SELECT * FROM buyer_addresses WHERE user_id = {$user['id']} ORDER BY is_default DESC, id DESC")->fetch_all(MYSQLI_ASSOC);
+$aq = $db->prepare("SELECT * FROM buyer_addresses WHERE user_id = ? ORDER BY is_default DESC, id DESC");
+$aq->execute([$user['id']]);
+$addresses = $aq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Kelola Alamat';
 $role  = 'buyer';

@@ -5,7 +5,9 @@ requireRole('buyer');
 $db = getDB();
 $user = currentUser();
 
-$orders = $db->query("SELECT o.*, r.name as resto_name, r.logo as resto_logo FROM orders o JOIN restaurants r ON o.restaurant_id = r.id WHERE o.buyer_id = {$user['id']} ORDER BY o.created_at DESC")->fetch_all(MYSQLI_ASSOC);
+$oq = $db->prepare("SELECT o.*, r.name as resto_name, r.logo as resto_logo FROM orders o JOIN restaurants r ON o.restaurant_id = r.id WHERE o.buyer_id = ? ORDER BY o.created_at DESC");
+$oq->execute([$user['id']]);
+$orders = $oq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Pesanan Saya';
 $role  = 'buyer';

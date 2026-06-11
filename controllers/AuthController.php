@@ -10,7 +10,7 @@ switch ($action) {
 }
 
 // ─── REGISTER ────────────────────────────────────────
-function handleRegister() {
+function handleRegister(): void {
     $db = getDB();
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         redirect(BASE_URL . '/views/public/register.php');
@@ -33,10 +33,8 @@ function handleRegister() {
 
     // Cek email sudah ada
     $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    if ($stmt->get_result()->num_rows > 0) $errors[] = 'Email sudah terdaftar.';
-    $stmt->close();
+    $stmt->execute([$email]);
+    if ($stmt->rowCount() > 0) $errors[] = 'Email sudah terdaftar.';
 
     if ($errors) {
         $_SESSION['reg_errors'] = $errors;
@@ -45,15 +43,14 @@ function handleRegister() {
         return;
     }
 
-    $hashed = password_hash($password, PASSWORD_BCRYPT);
-    $is_verified = ($role === 'buyer') ? 1 : 0; // seller & driver perlu verifikasi admin
+    $hashed      = password_hash($password, PASSWORD_BCRYPT);
+    $is_verified = ($role === 'buyer') ? 1 : 0;
 
     $stmt = $db->prepare("INSERT INTO users (name, email, password, phone, role, is_verified, is_active) VALUES (?,?,?,?,?,?,1)");
-    $stmt->bind_param("sssssi", $name, $email, $hashed, $phone, $role, $is_verified);
+    $stmt->execute([$name, $email, $hashed, $phone, $role, $is_verified]);
 
-    if ($stmt->execute()) {
-        $userId = $db->insert_id;
-        // Auto notifikasi selamat datang
+    if ($stmt->rowCount() > 0) {
+        $userId = (int)$db->lastInsertId('users_id_seq');
         sendNotification($userId, 'Selamat Datang di NomNom! 🍜', "Halo $name! Akun Anda berhasil dibuat." . ($role !== 'buyer' ? ' Tunggu verifikasi dari admin.' : ''), 'system');
         flash('success', 'Registrasi berhasil! Silakan login.');
         redirect(BASE_URL . '/views/public/login.php');
@@ -61,11 +58,10 @@ function handleRegister() {
         flash('error', 'Registrasi gagal, coba lagi.');
         redirect(BASE_URL . '/views/public/register.php');
     }
-    $stmt->close();
 }
 
 // ─── LOGIN ───────────────────────────────────────────
-function handleLogin() {
+function handleLogin(): void {
     $db = getDB();
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         redirect(BASE_URL . '/views/public/login.php');
@@ -82,10 +78,8 @@ function handleLogin() {
     }
 
     $stmt = $db->prepare("SELECT * FROM users WHERE email = ? AND is_active = 1 LIMIT 1");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $user = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user || !password_verify($password, $user['password'])) {
         flash('error', 'Email atau password salah.');
@@ -95,12 +89,13 @@ function handleLogin() {
 
     // Set session
     $_SESSION['user_id'] = $user['id'];
-    $_SESSION['user'] = $user;
+    $_SESSION['user']    = $user;
 
     // Remember me
     if ($remember) {
         $token = bin2hex(random_bytes(32));
-        $db->query("UPDATE users SET remember_token = '$token' WHERE id = {$user['id']}");
+        $upd   = $db->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
+        $upd->execute([$token, $user['id']]);
         setcookie('remember_token', $token, time() + (30 * 24 * 60 * 60), '/');
     }
 
@@ -115,17 +110,15 @@ function handleLogin() {
 }
 
 // ─── LOGOUT ──────────────────────────────────────────
-function handleLogout() {
+function handleLogout(): void {
     setcookie('remember_token', '', time() - 1, '/');
     session_destroy();
     redirect(BASE_URL . '/views/public/login.php');
 }
 
 // ─── Helper: kirim notifikasi ────────────────────────
-function sendNotification($userId, $title, $message, $type = 'system', $refId = null) {
-    $db = getDB();
+function sendNotification(int $userId, string $title, string $message, string $type = 'system', ?int $refId = null): void {
+    $db   = getDB();
     $stmt = $db->prepare("INSERT INTO notifications (user_id, title, message, type, reference_id) VALUES (?,?,?,?,?)");
-    $stmt->bind_param("isssi", $userId, $title, $message, $type, $refId);
-    $stmt->execute();
-    $stmt->close();
+    $stmt->execute([$userId, $title, $message, $type, $refId]);
 }

@@ -6,7 +6,9 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch restaurant
-$resto = $db->query("SELECT * FROM restaurants WHERE seller_id = {$user['id']}")->fetch_assoc();
+$rq = $db->prepare("SELECT * FROM restaurants WHERE seller_id = ?");
+$rq->execute([$user['id']]);
+$resto = $rq->fetch(PDO::FETCH_ASSOC);
 
 if (!$resto) {
     flash('error', 'Silakan daftarkan restoran terlebih dahulu.');
@@ -36,7 +38,8 @@ if ($tab === 'pending') {
 }
 $query .= "ORDER BY o.id DESC";
 
-$orders = $db->query($query)->fetch_all(MYSQLI_ASSOC);
+$oq = $db->query($query);
+$orders = $oq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Pesanan Masuk';
 $role  = 'seller';
@@ -73,7 +76,9 @@ ob_start();
   <?php else: ?>
     <?php foreach ($orders as $o): 
         // Get order items
-        $items = $db->query("SELECT oi.*, p.name as pname FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = {$o['id']}")->fetch_all(MYSQLI_ASSOC);
+        $iq = $db->prepare("SELECT oi.*, p.name as pname FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?");
+        $iq->execute([$o['id']]);
+        $items = $iq->fetchAll(PDO::FETCH_ASSOC);
     ?>
     <div class="card">
       <div class="card-header" style="background:var(--bg)">

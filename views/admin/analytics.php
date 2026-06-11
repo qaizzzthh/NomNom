@@ -5,18 +5,20 @@ requireRole('admin');
 $db = getDB();
 
 // Aggregates
-$sales_data = $db->query("SELECT SUM(total_amount) as total, COUNT(*) as c, AVG(total_amount) as avg_val FROM orders WHERE status = 'delivered'")->fetch_assoc();
+$sq = $db->query("SELECT SUM(total_amount) as total, COUNT(*) as c, AVG(total_amount) as avg_val FROM orders WHERE status = 'delivered'");
+$sales_data = $sq->fetch(PDO::FETCH_ASSOC);
 $total_sales = $sales_data['total'] ?? 0;
 $total_orders = $sales_data['c'] ?? 0;
 $avg_order = $sales_data['avg_val'] ?? 0;
 
 // Sales by restaurant
-$restaurant_sales = $db->query("SELECT r.name as resto_name, u.name as seller_name, SUM(o.total_amount) as total, COUNT(o.id) as orders_count
+$srq = $db->query("SELECT r.name as resto_name, u.name as seller_name, SUM(o.total_amount) as total, COUNT(o.id) as orders_count
                                 FROM restaurants r
                                 JOIN users u ON r.seller_id = u.id
                                 LEFT JOIN orders o ON o.restaurant_id = r.id AND o.status = 'delivered'
-                                GROUP BY r.id
-                                ORDER BY total DESC")->fetch_all(MYSQLI_ASSOC);
+                                GROUP BY r.id, r.name, u.name
+                                ORDER BY total DESC");
+$restaurant_sales = $srq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Analitik Sistem';
 $role  = 'admin';

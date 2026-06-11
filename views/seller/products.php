@@ -6,7 +6,9 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch restaurant
-$resto = $db->query("SELECT * FROM restaurants WHERE seller_id = {$user['id']}")->fetch_assoc();
+$rq = $db->prepare("SELECT * FROM restaurants WHERE seller_id = ?");
+$rq->execute([$user['id']]);
+$resto = $rq->fetch(PDO::FETCH_ASSOC);
 
 if (!$resto) {
     flash('error', 'Silakan daftarkan restoran terlebih dahulu.');
@@ -34,13 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $stmt = $db->prepare("INSERT INTO products (seller_id, restaurant_id, category_id, name, description, price, stock, image, is_available, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("iiissdisii", $user['id'], $resto_id, $category_id, $name, $description, $price, $stock, $image, $is_available, $is_featured);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$user['id'], $resto_id, $category_id, $name, $description, $price, $stock, $image, $is_available, $is_featured])) {
             flash('success', 'Menu baru berhasil ditambahkan!');
         } else {
             flash('error', 'Gagal menambahkan menu.');
         }
-        $stmt->close();
         redirect(BASE_URL . '/views/seller/products.php');
     }
 
@@ -55,7 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_available = isset($_POST['is_available']) ? 1 : 0;
 
         // Fetch current image
-        $prod = $db->query("SELECT image FROM products WHERE id = $id AND restaurant_id = $resto_id")->fetch_assoc();
+        $pq = $db->prepare("SELECT image FROM products WHERE id = ? AND restaurant_id = ?");
+        $pq->execute([$id, $resto_id]);
+        $prod = $pq->fetch(PDO::FETCH_ASSOC);
         $image = $prod['image'] ?? null;
 
         if (!empty($_FILES['image']['name'])) {
@@ -64,13 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $stmt = $db->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category_id = ?, image = ?, is_available = ?, is_featured = ? WHERE id = ? AND restaurant_id = ?");
-        $stmt->bind_param("ssdissiiii", $name, $description, $price, $stock, $category_id, $image, $is_available, $is_featured, $id, $resto_id);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$name, $description, $price, $stock, $category_id, $image, $is_available, $is_featured, $id, $resto_id])) {
             flash('success', 'Detail menu berhasil diperbarui!');
         } else {
             flash('error', 'Gagal memperbarui menu.');
         }
-        $stmt->close();
         redirect(BASE_URL . '/views/seller/products.php');
     }
 }
@@ -78,16 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Handle GET delete
 if (isset($_GET['delete_id'])) {
     $delete_id = (int)$_GET['delete_id'];
-    $db->query("DELETE FROM products WHERE id = $delete_id AND restaurant_id = $resto_id");
+    $dq = $db->prepare("DELETE FROM products WHERE id = ? AND restaurant_id = ?");
+    $dq->execute([$delete_id, $resto_id]);
     flash('success', 'Menu berhasil dihapus.');
     redirect(BASE_URL . '/views/seller/products.php');
 }
 
 // Fetch all categories
-$categories = $db->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name")->fetch_all(MYSQLI_ASSOC);
+$cq = $db->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name");
+$categories = $cq->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch products
-$products = $db->query("SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.restaurant_id = $resto_id ORDER BY p.id DESC")->fetch_all(MYSQLI_ASSOC);
+$pq2 = $db->prepare("SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.restaurant_id = ? ORDER BY p.id DESC");
+$pq2->execute([$resto_id]);
+$products = $pq2->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Kelola Menu';
 $role  = 'seller';

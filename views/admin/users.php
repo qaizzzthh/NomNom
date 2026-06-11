@@ -7,13 +7,16 @@ $db = getDB();
 // Handle verify
 if (isset($_GET['verify_id'])) {
     $verify_id = (int)$_GET['verify_id'];
-    $db->query("UPDATE users SET is_verified = 1 WHERE id = $verify_id");
-    
-    // Auto notification
-    $user_row = $db->query("SELECT * FROM users WHERE id = $verify_id")->fetch_assoc();
+    $upd = $db->prepare("UPDATE users SET is_verified = 1 WHERE id = ?");
+    $upd->execute([$verify_id]);
+
+    $su = $db->prepare("SELECT * FROM users WHERE id = ?");
+    $su->execute([$verify_id]);
+    $user_row = $su->fetch(PDO::FETCH_ASSOC);
     if ($user_row) {
         $msg = "Halo {$user_row['name']}! Akun Anda telah diverifikasi oleh admin. Sekarang Anda dapat menggunakan seluruh layanan kami secara penuh.";
-        $db->query("INSERT INTO notifications (user_id, title, message, type) VALUES ($verify_id, 'Akun Diverifikasi! ✅', '$msg', 'system')");
+        $sn = $db->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'Akun Diverifikasi! ✅', ?, 'system')");
+        $sn->execute([$verify_id, $msg]);
     }
     flash('success', 'User berhasil diverifikasi.');
     redirect(BASE_URL . '/views/admin/users.php');
@@ -22,20 +25,24 @@ if (isset($_GET['verify_id'])) {
 // Handle toggle active
 if (isset($_GET['toggle_id'])) {
     $toggle_id = (int)$_GET['toggle_id'];
-    $u = $db->query("SELECT is_active FROM users WHERE id = $toggle_id")->fetch_assoc();
+    $su = $db->prepare("SELECT is_active FROM users WHERE id = ?");
+    $su->execute([$toggle_id]);
+    $u = $su->fetch(PDO::FETCH_ASSOC);
     if ($u) {
         $new_state = $u['is_active'] ? 0 : 1;
-        $db->query("UPDATE users SET is_active = $new_state WHERE id = $toggle_id");
+        $upd = $db->prepare("UPDATE users SET is_active = ? WHERE id = ?");
+        $upd->execute([$new_state, $toggle_id]);
         flash('success', 'Status keaktifan user berhasil diperbarui.');
     }
     redirect(BASE_URL . '/views/admin/users.php');
 }
 
 // Fetch users
-$users = $db->query("SELECT * FROM users ORDER BY role ASC, id DESC")->fetch_all(MYSQLI_ASSOC);
+$uq = $db->query("SELECT * FROM users ORDER BY role ASC, id DESC");
+$users = $uq->fetchAll(PDO::FETCH_ASSOC);
 
-$title = 'Kelola User';
-$role  = 'admin';
+$title   = 'Kelola User';
+$role    = 'admin';
 $sidebar = true;
 ob_start();
 ?>

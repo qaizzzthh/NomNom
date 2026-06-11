@@ -6,7 +6,9 @@ $db = getDB();
 $user = currentUser();
 
 // Get cart items
-$cart_items = $db->query("SELECT c.*, p.name as pname, p.price, p.stock, r.name as resto_name, r.id as resto_id, r.latitude as r_lat, r.longitude as r_lon FROM cart c JOIN products p ON c.product_id = p.id JOIN restaurants r ON p.restaurant_id = r.id WHERE c.user_id = {$user['id']}")->fetch_all(MYSQLI_ASSOC);
+$cq = $db->prepare("SELECT c.*, p.name as pname, p.price, p.stock, r.name as resto_name, r.id as resto_id, r.latitude as r_lat, r.longitude as r_lon FROM cart c JOIN products p ON c.product_id = p.id JOIN restaurants r ON p.restaurant_id = r.id WHERE c.user_id = ?");
+$cq->execute([$user['id']]);
+$cart_items = $cq->fetchAll(PDO::FETCH_ASSOC);
 
 if (empty($cart_items)) {
     flash('error', 'Keranjang belanja Anda kosong.');
@@ -14,7 +16,9 @@ if (empty($cart_items)) {
 }
 
 // Get addresses
-$addresses = $db->query("SELECT * FROM buyer_addresses WHERE user_id = {$user['id']} ORDER BY is_default DESC")->fetch_all(MYSQLI_ASSOC);
+$aq = $db->prepare("SELECT * FROM buyer_addresses WHERE user_id = ? ORDER BY is_default DESC");
+$aq->execute([$user['id']]);
+$addresses = $aq->fetchAll(PDO::FETCH_ASSOC);
 
 $subtotal = 0;
 foreach ($cart_items as $item) {

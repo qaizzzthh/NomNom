@@ -6,7 +6,9 @@ $db = getDB();
 $user = currentUser();
 
 // Get restaurant info
-$resto = $db->query("SELECT * FROM restaurants WHERE seller_id = {$user['id']}")->fetch_assoc();
+$srq = $db->prepare("SELECT * FROM restaurants WHERE seller_id = ?");
+$srq->execute([$user['id']]);
+$resto = $srq->fetch(PDO::FETCH_ASSOC);
 
 $resto_id = $resto ? $resto['id'] : 0;
 
@@ -17,20 +19,25 @@ $menu_count = 0;
 $rating_avg = 0.0;
 
 if ($resto_id) {
-    $income_row = $db->query("SELECT SUM(total_amount) as total FROM orders WHERE restaurant_id = $resto_id AND status = 'delivered'")->fetch_assoc();
+    $ir = $db->prepare("SELECT SUM(total_amount) as total FROM orders WHERE restaurant_id = ? AND status = 'delivered'");
+    $ir->execute([$resto_id]); $income_row = $ir->fetch(PDO::FETCH_ASSOC);
     $total_income = $income_row['total'] ?? 0;
 
-    $orders_row = $db->query("SELECT COUNT(*) as c FROM orders WHERE restaurant_id = $resto_id")->fetch_assoc();
+    $or = $db->prepare("SELECT COUNT(*) as c FROM orders WHERE restaurant_id = ?");
+    $or->execute([$resto_id]); $orders_row = $or->fetch(PDO::FETCH_ASSOC);
     $total_orders = $orders_row['c'] ?? 0;
 
-    $menu_row = $db->query("SELECT COUNT(*) as c FROM products WHERE restaurant_id = $resto_id")->fetch_assoc();
+    $mr = $db->prepare("SELECT COUNT(*) as c FROM products WHERE restaurant_id = ?");
+    $mr->execute([$resto_id]); $menu_row = $mr->fetch(PDO::FETCH_ASSOC);
     $menu_count = $menu_row['c'] ?? 0;
 
-    $rating_row = $db->query("SELECT COALESCE(AVG(rev.rating), 0) as avg FROM review rev JOIN products prod ON rev.product_id = prod.id WHERE prod.restaurant_id = $resto_id")->fetch_assoc();
+    $rr = $db->prepare("SELECT COALESCE(AVG(rev.rating), 0) as avg FROM review rev JOIN products prod ON rev.product_id = prod.id WHERE prod.restaurant_id = ?");
+    $rr->execute([$resto_id]); $rating_row = $rr->fetch(PDO::FETCH_ASSOC);
     $rating_avg = $rating_row['avg'] ?? 0;
 
-    // Recent orders
-    $recent_orders = $db->query("SELECT o.*, u.name as buyer_name FROM orders o JOIN users u ON o.buyer_id = u.id WHERE o.restaurant_id = $resto_id ORDER BY o.created_at DESC LIMIT 5")->fetch_all(MYSQLI_ASSOC);
+    $ro = $db->prepare("SELECT o.*, u.name as buyer_name FROM orders o JOIN users u ON o.buyer_id = u.id WHERE o.restaurant_id = ? ORDER BY o.created_at DESC LIMIT 5");
+    $ro->execute([$resto_id]);
+    $recent_orders = $ro->fetchAll(PDO::FETCH_ASSOC);
 } else {
     $recent_orders = [];
 }

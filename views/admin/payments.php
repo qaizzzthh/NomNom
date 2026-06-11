@@ -2,46 +2,46 @@
 require_once __DIR__ . '/../../config/database.php';
 requireRole('admin');
 
-$db = getDB();
+$db   = getDB();
 $user = currentUser();
 
 // Handle Verify
 if (isset($_GET['verify_payment_id'])) {
     $payment_id = (int)$_GET['verify_payment_id'];
-    $payment = $db->query("SELECT * FROM payments WHERE id = $payment_id")->fetch_assoc();
-    
+    $sp = $db->prepare("SELECT * FROM payments WHERE id = ?");
+    $sp->execute([$payment_id]);
+    $payment = $sp->fetch(PDO::FETCH_ASSOC);
+
     if ($payment) {
-        $db->query("UPDATE payments SET status = 'verified', verified_at = NOW() WHERE id = $payment_id");
+        $upd = $db->prepare("UPDATE payments SET status = 'verified', verified_at = NOW() WHERE id = ?");
+        $upd->execute([$payment_id]);
         $order_id = $payment['order_id'];
-        
-        $order = $db->query("SELECT * FROM orders WHERE id = $order_id")->fetch_assoc();
+
+        $so = $db->prepare("SELECT * FROM orders WHERE id = ?");
+        $so->execute([$order_id]);
+        $order = $so->fetch(PDO::FETCH_ASSOC);
+
         if ($order && $order['status'] === 'pending') {
-            $db->query("UPDATE orders SET status = 'confirmed' WHERE id = $order_id");
-            
-            // Log tracking
+            $uo = $db->prepare("UPDATE orders SET status = 'confirmed' WHERE id = ?");
+            $uo->execute([$order_id]);
+
             $desc = 'Pembayaran transfer diverifikasi oleh admin';
-            $stmt = $db->prepare("INSERT INTO order_tracking (order_id, status, description, changed_by) VALUES (?, 'confirmed', ?, ?)");
-            $stmt->bind_param("isi", $order_id, $desc, $user['id']);
-            $stmt->execute();
-            $stmt->close();
-            
-            // Notify buyer
+            $st = $db->prepare("INSERT INTO order_tracking (order_id, status, description, changed_by) VALUES (?, 'confirmed', ?, ?)");
+            $st->execute([$order_id, $desc, $user['id']]);
+
             $buyer_title = 'Pembayaran Terverifikasi! 💳';
-            $buyer_msg = "Pembayaran transfer untuk pesanan {$order['order_code']} berhasil diverifikasi. Pesanan sedang diproses oleh restoran.";
-            $stmt = $db->prepare("INSERT INTO notifications (user_id, title, message, type, reference_id) VALUES (?, ?, ?, 'payment', ?)");
-            $stmt->bind_param("issi", $order['buyer_id'], $buyer_title, $buyer_msg, $order_id);
-            $stmt->execute();
-            $stmt->close();
-            
-            // Notify seller
-            $resto = $db->query("SELECT seller_id FROM restaurants WHERE id = {$order['restaurant_id']}")->fetch_assoc();
+            $buyer_msg   = "Pembayaran transfer untuk pesanan {$order['order_code']} berhasil diverifikasi. Pesanan sedang diproses oleh restoran.";
+            $sn = $db->prepare("INSERT INTO notifications (user_id, title, message, type, reference_id) VALUES (?, ?, ?, 'payment', ?)");
+            $sn->execute([$order['buyer_id'], $buyer_title, $buyer_msg, $order_id]);
+
+            $sr = $db->prepare("SELECT seller_id FROM restaurants WHERE id = ?");
+            $sr->execute([$order['restaurant_id']]);
+            $resto = $sr->fetch(PDO::FETCH_ASSOC);
             if ($resto) {
                 $seller_title = 'Pesanan Baru Terbayar 🔔';
-                $seller_msg = "Pesanan {$order['order_code']} telah dibayar oleh pembeli dan dikonfirmasi oleh admin. Silakan mulai memasak.";
-                $stmt = $db->prepare("INSERT INTO notifications (user_id, title, message, type, reference_id) VALUES (?, ?, ?, 'order', ?)");
-                $stmt->bind_param("issi", $resto['seller_id'], $seller_title, $seller_msg, $order_id);
-                $stmt->execute();
-                $stmt->close();
+                $seller_msg   = "Pesanan {$order['order_code']} telah dibayar oleh pembeli dan dikonfirmasi oleh admin. Silakan mulai memasak.";
+                $sn2 = $db->prepare("INSERT INTO notifications (user_id, title, message, type, reference_id) VALUES (?, ?, ?, 'order', ?)");
+                $sn2->execute([$resto['seller_id'], $seller_title, $seller_msg, $order_id]);
             }
         }
         flash('success', 'Pembayaran berhasil diverifikasi!');
@@ -52,21 +52,23 @@ if (isset($_GET['verify_payment_id'])) {
 // Handle Reject
 if (isset($_GET['reject_payment_id'])) {
     $payment_id = (int)$_GET['reject_payment_id'];
-    $payment = $db->query("SELECT * FROM payments WHERE id = $payment_id")->fetch_assoc();
-    
+    $sp = $db->prepare("SELECT * FROM payments WHERE id = ?");
+    $sp->execute([$payment_id]);
+    $payment = $sp->fetch(PDO::FETCH_ASSOC);
+
     if ($payment) {
-        $db->query("UPDATE payments SET status = 'rejected' WHERE id = $payment_id");
+        $upd = $db->prepare("UPDATE payments SET status = 'rejected' WHERE id = ?");
+        $upd->execute([$payment_id]);
         $order_id = $payment['order_id'];
-        
-        $order = $db->query("SELECT * FROM orders WHERE id = $order_id")->fetch_assoc();
+
+        $so = $db->prepare("SELECT * FROM orders WHERE id = ?");
+        $so->execute([$order_id]);
+        $order = $so->fetch(PDO::FETCH_ASSOC);
         if ($order) {
-            // Notify buyer
             $buyer_title = 'Pembayaran Ditolak ❌';
-            $buyer_msg = "Bukti transfer pembayaran untuk pesanan {$order['order_code']} ditolak karena tidak valid. Silakan unggah kembali bukti pembayaran yang benar.";
-            $stmt = $db->prepare("INSERT INTO notifications (user_id, title, message, type, reference_id) VALUES (?, ?, ?, 'payment', ?)");
-            $stmt->bind_param("issi", $order['buyer_id'], $buyer_title, $buyer_msg, $order_id);
-            $stmt->execute();
-            $stmt->close();
+            $buyer_msg   = "Bukti transfer pembayaran untuk pesanan {$order['order_code']} ditolak karena tidak valid. Silakan unggah kembali bukti pembayaran yang benar.";
+            $sn = $db->prepare("INSERT INTO notifications (user_id, title, message, type, reference_id) VALUES (?, ?, ?, 'payment', ?)");
+            $sn->execute([$order['buyer_id'], $buyer_title, $buyer_msg, $order_id]);
         }
         flash('success', 'Pembayaran ditolak.');
     }
@@ -74,15 +76,16 @@ if (isset($_GET['reject_payment_id'])) {
 }
 
 // Query pending and history bank transfer payments
-$payments = $db->query("SELECT p.*, o.order_code, o.total_amount, u.name as buyer_name 
+$pq = $db->query("SELECT p.*, o.order_code, o.total_amount, u.name as buyer_name 
                         FROM payments p 
                         JOIN orders o ON p.order_id = o.id 
                         JOIN users u ON o.buyer_id = u.id
                         WHERE p.payment_method = 'transfer'
-                        ORDER BY p.status DESC, p.id DESC")->fetch_all(MYSQLI_ASSOC);
+                        ORDER BY p.status DESC, p.id DESC");
+$payments = $pq->fetchAll(PDO::FETCH_ASSOC);
 
-$title = 'Verifikasi Pembayaran';
-$role  = 'admin';
+$title   = 'Verifikasi Pembayaran';
+$role    = 'admin';
 $sidebar = true;
 ob_start();
 ?>

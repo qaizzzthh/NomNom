@@ -7,12 +7,15 @@ $db = getDB();
 // Handle status updates
 if (isset($_GET['approve_id'])) {
     $approve_id = (int)$_GET['approve_id'];
-    $db->query("UPDATE restaurants SET status = 'active' WHERE id = $approve_id");
-    
-    // Auto notify seller
-    $resto = $db->query("SELECT * FROM restaurants WHERE id = $approve_id")->fetch_assoc();
+    $upd = $db->prepare("UPDATE restaurants SET status = 'active' WHERE id = ?");
+    $upd->execute([$approve_id]);
+
+    $sr = $db->prepare("SELECT * FROM restaurants WHERE id = ?");
+    $sr->execute([$approve_id]);
+    $resto = $sr->fetch(PDO::FETCH_ASSOC);
     if ($resto) {
-        $db->query("INSERT INTO notifications (user_id, title, message, type) VALUES ({$resto['seller_id']}, 'Restoran Disetujui! 🏪', 'Restoran Anda {$resto['name']} telah disetujui oleh admin dan sekarang aktif!', 'system')");
+        $sn = $db->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'Restoran Disetujui! 🏪', ?, 'system')");
+        $sn->execute([$resto['seller_id'], "Restoran Anda {$resto['name']} telah disetujui oleh admin dan sekarang aktif!"]);
     }
     flash('success', 'Restoran berhasil disetujui.');
     redirect(BASE_URL . '/views/admin/restaurants.php');
@@ -20,16 +23,18 @@ if (isset($_GET['approve_id'])) {
 
 if (isset($_GET['suspend_id'])) {
     $suspend_id = (int)$_GET['suspend_id'];
-    $db->query("UPDATE restaurants SET status = 'suspended' WHERE id = $suspend_id");
+    $upd = $db->prepare("UPDATE restaurants SET status = 'suspended' WHERE id = ?");
+    $upd->execute([$suspend_id]);
     flash('success', 'Restoran berhasil ditangguhkan (suspend).');
     redirect(BASE_URL . '/views/admin/restaurants.php');
 }
 
 // Fetch all restaurants
-$restaurants = $db->query("SELECT r.*, u.name as seller_name FROM restaurants r JOIN users u ON r.seller_id = u.id ORDER BY r.id DESC")->fetch_all(MYSQLI_ASSOC);
+$rq = $db->query("SELECT r.*, u.name as seller_name FROM restaurants r JOIN users u ON r.seller_id = u.id ORDER BY r.id DESC");
+$restaurants = $rq->fetchAll(PDO::FETCH_ASSOC);
 
-$title = 'Kelola Restoran';
-$role  = 'admin';
+$title   = 'Kelola Restoran';
+$role    = 'admin';
 $sidebar = true;
 ob_start();
 ?>

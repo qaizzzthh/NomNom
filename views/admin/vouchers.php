@@ -18,13 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $expired_at = $_POST['expired_at'] ? date('Y-m-d H:i:s', strtotime($_POST['expired_at'])) : null;
         
         $stmt = $db->prepare("INSERT INTO vouchers (code, discount_type, discount_value, min_order, max_discount, usage_limit, expired_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
-        $stmt->bind_param("ssdddis", $code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at])) {
             flash('success', 'Voucher baru berhasil dibuat!');
         } else {
             flash('error', 'Gagal membuat voucher.');
         }
-        $stmt->close();
         redirect(BASE_URL . '/views/admin/vouchers.php');
     }
 
@@ -40,19 +38,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_active = isset($_POST['is_active']) ? 1 : 0;
         
         $stmt = $db->prepare("UPDATE vouchers SET code = ?, discount_type = ?, discount_value = ?, min_order = ?, max_discount = ?, usage_limit = ?, expired_at = ?, is_active = ? WHERE id = ?");
-        $stmt->bind_param("ssdddisii", $code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at, $is_active, $id);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at, $is_active, $id])) {
             flash('success', 'Voucher berhasil diperbarui!');
         } else {
             flash('error', 'Gagal memperbarui voucher.');
         }
-        $stmt->close();
         redirect(BASE_URL . '/views/admin/vouchers.php');
     }
 }
 
 // Fetch all vouchers
-$vouchers = $db->query("SELECT * FROM vouchers ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
+$vq = $db->query("SELECT * FROM vouchers ORDER BY id DESC");
+$vouchers = $vq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Kelola Voucher';
 $role  = 'admin';

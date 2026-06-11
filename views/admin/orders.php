@@ -5,12 +5,13 @@ requireRole('admin');
 $db = getDB();
 
 // Fetch all orders
-$orders = $db->query("SELECT o.*, r.name as resto_name, u.name as buyer_name, d.name as driver_name 
+$oq = $db->query("SELECT o.*, r.name as resto_name, u.name as buyer_name, d.name as driver_name 
                       FROM orders o 
                       JOIN restaurants r ON o.restaurant_id = r.id 
                       JOIN users u ON o.buyer_id = u.id 
                       LEFT JOIN users d ON o.driver_id = d.id 
-                      ORDER BY o.id DESC LIMIT 100")->fetch_all(MYSQLI_ASSOC);
+                      ORDER BY o.id DESC LIMIT 100");
+$orders = $oq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Semua Pesanan';
 $role  = 'admin';
