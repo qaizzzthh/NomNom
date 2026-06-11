@@ -10,7 +10,8 @@ $resto_query = "SELECT r.*, u.name as seller_name, COUNT(DISTINCT p.id) as menu_
     WHERE r.status = 'active'
     GROUP BY r.id
     ORDER BY rating_avg DESC, r.created_at DESC";
-$restaurants = $db->query($resto_query)->fetch_all(MYSQLI_ASSOC);
+$rq = $db->query($resto_query);
+$restaurants = $rq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Semua Restoran';
 $role  = currentUser()['role'] ?? 'public';

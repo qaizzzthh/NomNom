@@ -11,13 +11,14 @@ if (!$user['is_verified']) {
 }
 
 // Fetch orders that are ready/preparing for pick-up and have no driver assigned
-$orders = $db->query("SELECT o.*, r.name as resto_name, r.address as resto_addr, a.address as buyer_addr, u.name as buyer_name 
+$oq = $db->query("SELECT o.*, r.name as resto_name, r.address as resto_addr, a.address as buyer_addr, u.name as buyer_name 
                       FROM orders o 
                       JOIN restaurants r ON o.restaurant_id = r.id 
                       JOIN buyer_addresses a ON o.address_id = a.id
                       JOIN users u ON o.buyer_id = u.id
                       WHERE o.status = 'preparing' AND o.driver_id IS NULL 
-                      ORDER BY o.id DESC")->fetch_all(MYSQLI_ASSOC);
+                      ORDER BY o.id DESC");
+$orders = $oq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Order Tersedia';
 $role  = 'driver';

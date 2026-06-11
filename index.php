@@ -3,7 +3,8 @@ require_once __DIR__ . '/config/database.php';
 $db = getDB();
 
 // Ambil semua kategori
-$categories = $db->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name")->fetch_all(MYSQLI_ASSOC);
+$cq = $db->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name");
+$categories = $cq->fetchAll(PDO::FETCH_ASSOC);
 
 // Filter kategori
 $cat_filter = (int)($_GET['cat'] ?? 0);
@@ -18,13 +19,15 @@ $resto_query = "SELECT r.*, u.name as seller_name, COUNT(DISTINCT p.id) as menu_
     GROUP BY r.id
     ORDER BY rating_avg DESC, r.created_at DESC
     LIMIT 12";
-$restaurants = $db->query($resto_query)->fetch_all(MYSQLI_ASSOC);
+$rq = $db->query($resto_query);
+$restaurants = $rq->fetchAll(PDO::FETCH_ASSOC);
 
 // Produk featured
 $featured_q = $cat_filter
     ? "SELECT p.*, r.name as resto_name, c.name as cat_name FROM products p JOIN restaurants r ON p.restaurant_id = r.id JOIN categories c ON p.category_id = c.id WHERE p.is_featured = 1 AND p.is_available = 1 AND r.status = 'active' AND p.category_id = $cat_filter ORDER BY p.id DESC LIMIT 12"
     : "SELECT p.*, r.name as resto_name, c.name as cat_name FROM products p JOIN restaurants r ON p.restaurant_id = r.id JOIN categories c ON p.category_id = c.id WHERE p.is_featured = 1 AND p.is_available = 1 AND r.status = 'active' ORDER BY p.id DESC LIMIT 12";
-$featured = $db->query($featured_q)->fetch_all(MYSQLI_ASSOC);
+$fq = $db->query($featured_q);
+$featured = $fq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Beranda';
 $role  = currentUser()['role'] ?? 'public';

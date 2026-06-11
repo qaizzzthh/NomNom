@@ -6,7 +6,9 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch restaurant
-$resto = $db->query("SELECT * FROM restaurants WHERE seller_id = {$user['id']}")->fetch_assoc();
+$rq = $db->prepare("SELECT * FROM restaurants WHERE seller_id = ?");
+$rq->execute([$user['id']]);
+$resto = $rq->fetch(PDO::FETCH_ASSOC);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = sanitize($_POST['name'] ?? '');
@@ -34,24 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($resto) {
         // Update
         $stmt = $db->prepare("UPDATE restaurants SET name = ?, description = ?, address = ?, latitude = ?, longitude = ?, open_time = ?, close_time = ?, min_order = ?, logo = ?, banner = ? WHERE id = ?");
-        $stmt->bind_param("sssddssdssi", $name, $description, $address, $latitude, $longitude, $open_time, $close_time, $min_order, $logo, $banner, $resto['id']);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$name, $description, $address, $latitude, $longitude, $open_time, $close_time, $min_order, $logo, $banner, $resto['id']])) {
             flash('success', 'Detail restoran berhasil diperbarui!');
         } else {
             flash('error', 'Gagal memperbarui detail restoran.');
         }
-        $stmt->close();
     } else {
         // Insert
         $status = 'pending'; // admin verification required
         $stmt = $db->prepare("INSERT INTO restaurants (seller_id, name, description, address, latitude, longitude, logo, banner, open_time, close_time, min_order, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("isssddssssds", $user['id'], $name, $description, $address, $latitude, $longitude, $logo, $banner, $open_time, $close_time, $min_order, $status);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$user['id'], $name, $description, $address, $latitude, $longitude, $logo, $banner, $open_time, $close_time, $min_order, $status])) {
             flash('success', 'Restoran Anda berhasil didaftarkan! Menunggu verifikasi admin.');
         } else {
             flash('error', 'Gagal mendaftarkan restoran.');
         }
-        $stmt->close();
     }
     redirect(BASE_URL . '/views/seller/restaurant.php');
 }

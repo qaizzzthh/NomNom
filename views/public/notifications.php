@@ -5,7 +5,9 @@ requireLogin();
 $db = getDB();
 $user = currentUser();
 
-$notifs = $db->query("SELECT * FROM notifications WHERE user_id = {$user['id']} ORDER BY created_at DESC LIMIT 50")->fetch_all(MYSQLI_ASSOC);
+$nq = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50");
+$nq->execute([$user['id']]);
+$notifs = $nq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Notifikasi Saya';
 $role  = $user['role'];

@@ -5,12 +5,14 @@ $db = getDB();
 $restaurant_id = (int)($_GET['id'] ?? 0);
 
 // Get restaurant info
-$resto = $db->query("SELECT r.*, u.name as seller_name,
+$rsq = $db->prepare("SELECT r.*, u.name as seller_name,
     (SELECT COALESCE(AVG(rev.rating), 0) FROM review rev JOIN products prod ON rev.product_id = prod.id WHERE prod.restaurant_id = r.id) as rating_avg,
     (SELECT COUNT(*) FROM review rev JOIN products prod ON rev.product_id = prod.id WHERE prod.restaurant_id = r.id) as review_count
     FROM restaurants r
     JOIN users u ON r.seller_id = u.id
-    WHERE r.id = $restaurant_id AND r.status = 'active'")->fetch_assoc();
+    WHERE r.id = ? AND r.status = 'active'");
+$rsq->execute([$restaurant_id]);
+$resto = $rsq->fetch(PDO::FETCH_ASSOC);
 
 if (!$resto) {
     flash('error', 'Restoran tidak ditemukan atau tidak aktif.');
@@ -18,12 +20,13 @@ if (!$resto) {
 }
 
 // Get categories present in this restaurant's products
-$cat_query = "SELECT DISTINCT c.* FROM categories c JOIN products p ON p.category_id = c.id WHERE p.restaurant_id = $restaurant_id AND p.is_available = 1";
-$categories = $db->query($cat_query)->fetch_all(MYSQLI_ASSOC);
+$cq = $db->prepare("SELECT DISTINCT c.* FROM categories c JOIN products p ON p.category_id = c.id WHERE p.restaurant_id = ? AND p.is_available = 1");
+$cq->execute([$restaurant_id]);
+$categories = $cq->fetchAll(PDO::FETCH_ASSOC);
 
-// Get products
-$prod_query = "SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.restaurant_id = $restaurant_id AND p.is_available = 1 ORDER BY p.is_featured DESC, p.name ASC";
-$products = $db->query($prod_query)->fetch_all(MYSQLI_ASSOC);
+$pq = $db->prepare("SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.restaurant_id = ? AND p.is_available = 1 ORDER BY p.is_featured DESC, p.name ASC");
+$pq->execute([$restaurant_id]);
+$products = $pq->fetchAll(PDO::FETCH_ASSOC);
 
 // Check if open
 $now_time = date('H:i:s');

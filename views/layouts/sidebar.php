@@ -23,7 +23,9 @@ $current = basename($_SERVER['PHP_SELF']);
       <i class="fa fa-clipboard-list"></i> <span>Pesanan Masuk</span>
       <?php
       $db = getDB();
-      $pending = $db->query("SELECT COUNT(*) as c FROM orders o JOIN restaurants r ON o.restaurant_id = r.id WHERE r.seller_id = {$user['id']} AND o.status = 'pending'")->fetch_assoc()['c'];
+      $pq = $db->prepare("SELECT COUNT(*) as c FROM orders o JOIN restaurants r ON o.restaurant_id = r.id WHERE r.seller_id = ? AND o.status = 'pending'");
+      $pq->execute([$user['id']]);
+      $pending = $pq->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
       if ($pending > 0): ?><span class="sidebar-badge"><?= $pending ?></span><?php endif; ?>
     </a>
     <a href="<?= BASE_URL ?>/views/seller/income.php" class="<?= $current === 'income.php' ? 'active' : '' ?>">
@@ -53,7 +55,9 @@ $current = basename($_SERVER['PHP_SELF']);
       <i class="fa fa-credit-card"></i> <span>Verifikasi Bayar</span>
       <?php
       $db = getDB();
-      $pend_pay = $db->query("SELECT COUNT(*) as c FROM payments WHERE status = 'pending'")->fetch_assoc()['c'];
+      $ppq = $db->prepare("SELECT COUNT(*) as c FROM payments WHERE status = 'pending'");
+      $ppq->execute([]);
+      $pend_pay = $ppq->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
       if ($pend_pay > 0): ?><span class="sidebar-badge"><?= $pend_pay ?></span><?php endif; ?>
     </a>
     <a href="<?= BASE_URL ?>/views/admin/vouchers.php" class="<?= $current === 'vouchers.php' ? 'active' : '' ?>">

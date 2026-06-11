@@ -26,7 +26,9 @@ $role = $user['role'] ?? 'public';
         <i class="fa fa-shopping-cart"></i>
         <?php
         $db = getDB();
-        $cart_count = $db->query("SELECT SUM(qty) as total FROM cart WHERE user_id = {$user['id']}")->fetch_assoc()['total'] ?? 0;
+        $ccq = $db->prepare("SELECT SUM(qty) as total FROM cart WHERE user_id = ?");
+        $ccq->execute([$user['id']]);
+        $cart_count = $ccq->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
         ?>
         <?php if ($cart_count > 0): ?><span class="badge"><?= $cart_count ?></span><?php endif; ?>
       </a>
@@ -37,7 +39,9 @@ $role = $user['role'] ?? 'public';
         <button class="btn-icon" id="notifBtn" title="Notifikasi">
           <i class="fa fa-bell"></i>
           <?php
-          $unread = $db->query("SELECT COUNT(*) as c FROM notifications WHERE user_id = {$user['id']} AND is_read = 0")->fetch_assoc()['c'] ?? 0;
+          $ucq = $db->prepare("SELECT COUNT(*) as c FROM notifications WHERE user_id = ? AND is_read = 0");
+          $ucq->execute([$user['id']]);
+          $unread = $ucq->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
           ?>
           <?php if ($unread > 0): ?><span class="badge"><?= $unread ?></span><?php endif; ?>
         </button>
@@ -48,8 +52,9 @@ $role = $user['role'] ?? 'public';
           </div>
           <div class="notif-list">
             <?php
-            $notifs = $db->query("SELECT * FROM notifications WHERE user_id = {$user['id']} ORDER BY created_at DESC LIMIT 5");
-            while ($n = $notifs->fetch_assoc()):
+            $nq = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+            $nq->execute([$user['id']]);
+            while ($n = $nq->fetch(PDO::FETCH_ASSOC)):
             ?>
             <a href="<?= BASE_URL ?>/controllers/NotificationController.php?action=read&id=<?= $n['id'] ?>" class="notif-item <?= $n['is_read'] ? '' : 'unread' ?>">
               <div class="notif-icon type-<?= $n['type'] ?>">

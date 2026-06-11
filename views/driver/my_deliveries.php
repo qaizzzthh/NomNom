@@ -6,13 +6,15 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch active order
-$order = $db->query("SELECT o.*, r.name as resto_name, r.address as resto_addr, r.phone as resto_phone, a.address as buyer_addr, a.recipient_name, a.phone as buyer_phone, p.payment_method, p.status as payment_status 
+$oq = $db->prepare("SELECT o.*, r.name as resto_name, r.address as resto_addr, r.phone as resto_phone, a.address as buyer_addr, a.recipient_name, a.phone as buyer_phone, p.payment_method, p.status as payment_status 
                      FROM orders o 
                      JOIN restaurants r ON o.restaurant_id = r.id 
                      JOIN buyer_addresses a ON o.address_id = a.id
                      JOIN payments p ON p.order_id = o.id
-                     WHERE o.driver_id = {$user['id']} AND o.status = 'on_delivery' 
-                     LIMIT 1")->fetch_assoc();
+                     WHERE o.driver_id = ? AND o.status = 'on_delivery' 
+                     LIMIT 1");
+$oq->execute([$user['id']]);
+$order = $oq->fetch(PDO::FETCH_ASSOC);
 
 $title = 'Pengiriman Saya';
 $role  = 'driver';

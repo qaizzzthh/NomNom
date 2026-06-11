@@ -6,12 +6,14 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch completed deliveries
-$deliveries = $db->query("SELECT o.*, r.name as resto_name, a.address as buyer_addr, a.recipient_name 
+$dq = $db->prepare("SELECT o.*, r.name as resto_name, a.address as buyer_addr, a.recipient_name 
                           FROM orders o 
                           JOIN restaurants r ON o.restaurant_id = r.id 
                           JOIN buyer_addresses a ON o.address_id = a.id
-                          WHERE o.driver_id = {$user['id']} AND o.status = 'delivered' 
-                          ORDER BY o.id DESC")->fetch_all(MYSQLI_ASSOC);
+                          WHERE o.driver_id = ? AND o.status = 'delivered' 
+                          ORDER BY o.id DESC");
+$dq->execute([$user['id']]);
+$deliveries = $dq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Riwayat Pengiriman';
 $role  = 'driver';

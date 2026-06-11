@@ -6,19 +6,23 @@ $db = getDB();
 $user = currentUser();
 
 // Aggregate stats
-$stats = $db->query("SELECT COUNT(*) as total, SUM(delivery_fee) as earnings 
+$sq = $db->prepare("SELECT COUNT(*) as total, SUM(delivery_fee) as earnings 
                      FROM orders 
-                     WHERE driver_id = {$user['id']} AND status = 'delivered'")->fetch_assoc();
+                     WHERE driver_id = ? AND status = 'delivered'");
+$sq->execute([$user['id']]);
+$stats = $sq->fetch(PDO::FETCH_ASSOC);
 $total_deliveries = $stats['total'] ?? 0;
 $total_earnings = $stats['earnings'] ?? 0;
 
 // Active delivery
-$active_order = $db->query("SELECT o.*, r.name as resto_name, a.address as buyer_addr 
+$aq = $db->prepare("SELECT o.*, r.name as resto_name, a.address as buyer_addr 
                             FROM orders o 
                             JOIN restaurants r ON o.restaurant_id = r.id 
                             JOIN buyer_addresses a ON o.address_id = a.id
-                            WHERE o.driver_id = {$user['id']} AND o.status = 'on_delivery' 
-                            LIMIT 1")->fetch_assoc();
+                            WHERE o.driver_id = ? AND o.status = 'on_delivery' 
+                            LIMIT 1");
+$aq->execute([$user['id']]);
+$active_order = $aq->fetch(PDO::FETCH_ASSOC);
 
 $title = 'Driver Dashboard';
 $role  = 'driver';

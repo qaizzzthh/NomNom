@@ -17,10 +17,8 @@ if ($q !== '') {
         LIMIT 10";
     $stmt = $db->prepare($resto_query);
     $like_q = "%$q%";
-    $stmt->bind_param("s", $like_q);
-    $stmt->execute();
-    $restaurants = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+    $stmt->execute([$like_q]);
+    $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Search products
     $prod_query = "SELECT p.*, r.name as resto_name, r.id as resto_id
@@ -28,11 +26,9 @@ if ($q !== '') {
         JOIN restaurants r ON p.restaurant_id = r.id
         WHERE p.is_available = 1 AND r.status = 'active' AND p.name LIKE ?
         LIMIT 20";
-    $stmt = $db->prepare($prod_query);
-    $stmt->bind_param("s", $like_q);
-    $stmt->execute();
-    $products = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+    $stmt2 = $db->prepare($prod_query);
+    $stmt2->execute([$like_q]);
+    $products = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 }
 
 $title = 'Cari "' . $q . '"';
