@@ -16,10 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Check duplicate email (excluding current user)
     $stmt = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
-    $stmt->bind_param("si", $email, $user['id']);
-    $stmt->execute();
-    if ($stmt->get_result()->num_rows > 0) $errors[] = 'Email sudah digunakan oleh akun lain.';
-    $stmt->close();
+    $stmt->execute([$email, $user['id']]);
+    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        $errors[] = 'Email sudah digunakan oleh akun lain.';
+    }
 
     // Handle avatar upload
     $avatar_path = $user['avatar'];
@@ -34,17 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         $stmt = $db->prepare("UPDATE users SET name = ?, email = ?, phone = ?, avatar = ? WHERE id = ?");
-        $stmt->bind_param("ssssi", $name, $email, $phone, $avatar_path, $user['id']);
-        if ($stmt->execute()) {
+        if ($stmt->execute([$name, $email, $phone, $avatar_path, $user['id']])) {
             // Update session user details
-            $updated = $db->query("SELECT * FROM users WHERE id = {$user['id']}")->fetch_assoc();
+            $uq = $db->prepare("SELECT * FROM users WHERE id = ?");
+            $uq->execute([$user['id']]);
+            $updated = $uq->fetch(PDO::FETCH_ASSOC);
             $_SESSION['user'] = $updated;
             $user = $updated;
             flash('success', 'Profil Anda berhasil diperbarui!');
         } else {
             flash('error', 'Gagal memperbarui profil.');
         }
-        $stmt->close();
         redirect(BASE_URL . '/views/buyer/profile.php');
     } else {
         $_SESSION['flash']['error'] = implode('<br>', $errors);
