@@ -8,7 +8,10 @@ define('DB_USER', getenv('DB_USER') ?: 'postgres.ggcgucplxtyzpsydbsrj');
 define('DB_PASS', getenv('DB_PASS') ?: '54iKBBmIuxULKN2q');
 
 // Dynamic BASE_URL detection
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? 80) == 443) ? "https://" : "http://";
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' 
+    || ($_SERVER['SERVER_PORT'] ?? 80) == 443 
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $projectRoot = str_replace('\\', '/', dirname(__DIR__));
 $docRoot = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? '');
