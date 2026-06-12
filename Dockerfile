@@ -9,6 +9,9 @@ RUN apk update && apk add --no-cache \
 # Buat direktori kerja untuk aplikasi
 WORKDIR /var/www/localhost/htdocs
 
+# Hapus file index.html bawaan Apache yang menampilkan "It works!"
+RUN rm -f index.html
+
 # Salin semua source code aplikasi kamu
 COPY . .
 
