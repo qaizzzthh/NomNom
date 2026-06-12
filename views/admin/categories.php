@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_active = isset($_POST['is_active']) ? true : false;
         
         $stmt = $db->prepare("UPDATE categories SET name = ?, description = ?, icon = ?, is_active = ? WHERE id = ?");
-        if ($stmt->execute([$name, $description, $icon, $is_active, $id])) {
+        if ($stmt->execute([$name, $description, $icon, $is_active ? 'true' : 'false', $id])) {
             flash('success', 'Kategori berhasil diperbarui!');
         } else {
             flash('error', 'Gagal memperbarui kategori.');

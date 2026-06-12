@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     $stmt = $db->prepare("INSERT INTO buyer_addresses (user_id, label, recipient_name, phone, address, latitude, longitude, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    if ($stmt->execute([$user['id'], $label, $recipient_name, $phone, $address, $lat, $lon, $is_default])) {
+    if ($stmt->execute([$user['id'], $label, $recipient_name, $phone, $address, $lat, $lon, $is_default ? 'true' : 'false'])) {
         flash('success', 'Alamat berhasil ditambahkan!');
     } else {
         flash('error', 'Gagal menambahkan alamat.');

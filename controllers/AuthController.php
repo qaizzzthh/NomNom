@@ -47,7 +47,7 @@ function handleRegister(): void {
     $is_verified = ($role === 'buyer') ? true : false;
 
     $stmt = $db->prepare("INSERT INTO users (name, email, password, phone, role, is_verified, is_active) VALUES (?,?,?,?,?,?,TRUE)");
-    $stmt->execute([$name, $email, $hashed, $phone, $role, $is_verified]);
+    $stmt->execute([$name, $email, $hashed, $phone, $role, $is_verified ? 'true' : 'false']);
 
     if ($stmt->rowCount() > 0) {
         $userId = (int)$db->lastInsertId('users_id_seq');

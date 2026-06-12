@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_active = isset($_POST['is_active']) ? true : false;
         
         $stmt = $db->prepare("UPDATE vouchers SET code = ?, discount_type = ?, discount_value = ?, min_order = ?, max_discount = ?, usage_limit = ?, expired_at = ?, is_active = ? WHERE id = ?");
-        if ($stmt->execute([$code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at, $is_active, $id])) {
+        if ($stmt->execute([$code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at, $is_active ? 'true' : 'false', $id])) {
             flash('success', 'Voucher berhasil diperbarui!');
         } else {
             flash('error', 'Gagal memperbarui voucher.');

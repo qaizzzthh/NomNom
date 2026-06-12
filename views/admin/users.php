@@ -31,7 +31,7 @@ if (isset($_GET['toggle_id'])) {
     if ($u) {
         $new_state = $u['is_active'] ? false : true;
         $upd = $db->prepare("UPDATE users SET is_active = ? WHERE id = ?");
-        $upd->execute([$new_state, $toggle_id]);
+        $upd->execute([$new_state ? 'true' : 'false', $toggle_id]);
         flash('success', 'Status keaktifan user berhasil diperbarui.');
     }
     redirect(BASE_URL . '/views/admin/users.php');

@@ -20,8 +20,8 @@ $users = [
         'password'    => password_hash('password', PASSWORD_BCRYPT),
         'phone'       => '081111111111',
         'role'        => 'admin',
-        'is_verified' => 1,
-        'is_active'   => 1
+        'is_verified' => true,
+        'is_active'   => true
     ],
     [
         'name'        => 'Seller NomNom',
@@ -29,8 +29,8 @@ $users = [
         'password'    => password_hash('password', PASSWORD_BCRYPT),
         'phone'       => '082222222222',
         'role'        => 'seller',
-        'is_verified' => 1,
-        'is_active'   => 1
+        'is_verified' => true,
+        'is_active'   => true
     ],
     [
         'name'        => 'Buyer NomNom',
@@ -38,8 +38,8 @@ $users = [
         'password'    => password_hash('password', PASSWORD_BCRYPT),
         'phone'       => '083333333333',
         'role'        => 'buyer',
-        'is_verified' => 1,
-        'is_active'   => 1
+        'is_verified' => true,
+        'is_active'   => true
     ],
     [
         'name'        => 'Driver NomNom',
@@ -47,14 +47,21 @@ $users = [
         'password'    => password_hash('password', PASSWORD_BCRYPT),
         'phone'       => '084444444444',
         'role'        => 'driver',
-        'is_verified' => 1,
-        'is_active'   => 1
+        'is_verified' => true,
+        'is_active'   => true
     ]
 ];
 
 foreach ($users as $u) {
-    $stmt = $db->prepare("INSERT INTO users (name, email, password, phone, role, is_verified, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$u['name'], $u['email'], $u['password'], $u['phone'], $u['role'], $u['is_verified'], $u['is_active']]);
+    $stmt = $db->prepare("INSERT INTO users (name, email, password, phone, role, is_verified, is_active) VALUES (:name, :email, :password, :phone, :role, :is_verified, :is_active)");
+    $stmt->bindValue(':name', $u['name']);
+    $stmt->bindValue(':email', $u['email']);
+    $stmt->bindValue(':password', $u['password']);
+    $stmt->bindValue(':phone', $u['phone']);
+    $stmt->bindValue(':role', $u['role']);
+    $stmt->bindValue(':is_verified', $u['is_verified'], PDO::PARAM_BOOL);
+    $stmt->bindValue(':is_active', $u['is_active'], PDO::PARAM_BOOL);
+    $stmt->execute();
 }
 echo "Seeded users.\n";
 
@@ -74,7 +81,7 @@ $categories = [
 ];
 
 foreach ($categories as $c) {
-    $stmt = $db->prepare("INSERT INTO categories (name, description, icon, is_active) VALUES (?, ?, ?, 1)");
+    $stmt = $db->prepare("INSERT INTO categories (name, description, icon, is_active) VALUES (?, ?, ?, true)");
     $stmt->execute([$c['name'], $c['description'], $c['icon']]);
 }
 echo "Seeded categories.\n";
@@ -104,18 +111,26 @@ echo "Seeded restaurant.\n";
 
 // 4. Seed Products
 $products = [
-    ['name' => 'Nasi Goreng Spesial Telur',   'description' => 'Nasi goreng dengan bumbu khas warung dilengkapi telur ceplok dan kerupuk.',    'price' => 22000.00, 'stock' => 50, 'category_id' => $cat_makanan, 'is_featured' => 1],
-    ['name' => 'Ayam Bakar Taliwang',          'description' => 'Ayam bakar bumbu Taliwang pedas manis meresap, disajikan dengan sambal.',       'price' => 28000.00, 'stock' => 30, 'category_id' => $cat_makanan, 'is_featured' => 1],
-    ['name' => 'Es Teh Manis Selasih',         'description' => 'Es teh manis dingin segar dengan tambahan biji selasih berkhasiat.',            'price' =>  6000.00, 'stock' => 100, 'category_id' => $cat_minuman, 'is_featured' => 0],
-    ['name' => 'Jus Alpukat Kocok',            'description' => 'Jus alpukat segar premium ditambah topping susu cokelat kental manis.',         'price' => 14000.00, 'stock' => 25,  'category_id' => $cat_minuman, 'is_featured' => 1],
-    ['name' => 'Kentang Goreng Keju',          'description' => 'Kentang goreng renyah ditaburi bumbu keju bubuk melimpah.',                     'price' => 15000.00, 'stock' => 40,  'category_id' => $cat_cemilan, 'is_featured' => 0],
-    ['name' => 'Roti Bakar Cokelat Keju',      'description' => 'Roti bakar empuk diisi cokelat lumer dan keju parut gurih.',                   'price' => 18000.00, 'stock' => 35,  'category_id' => $cat_cemilan, 'is_featured' => 1],
-    ['name' => 'Puding Coklat Lava',           'description' => 'Puding cokelat lembut dengan saus fla vanila lezat di dalamnya.',              'price' => 12000.00, 'stock' => 20,  'category_id' => $cat_dessert, 'is_featured' => 1],
+    ['name' => 'Nasi Goreng Spesial Telur',   'description' => 'Nasi goreng dengan bumbu khas warung dilengkapi telur ceplok dan kerupuk.',    'price' => 22000.00, 'stock' => 50, 'category_id' => $cat_makanan, 'is_featured' => true],
+    ['name' => 'Ayam Bakar Taliwang',          'description' => 'Ayam bakar bumbu Taliwang pedas manis meresap, disajikan dengan sambal.',       'price' => 28000.00, 'stock' => 30, 'category_id' => $cat_makanan, 'is_featured' => true],
+    ['name' => 'Es Teh Manis Selasih',         'description' => 'Es teh manis dingin segar dengan tambahan biji selasih berkhasiat.',            'price' =>  6000.00, 'stock' => 100, 'category_id' => $cat_minuman, 'is_featured' => false],
+    ['name' => 'Jus Alpukat Kocok',            'description' => 'Jus alpukat segar premium ditambah topping susu cokelat kental manis.',         'price' => 14000.00, 'stock' => 25,  'category_id' => $cat_minuman, 'is_featured' => true],
+    ['name' => 'Kentang Goreng Keju',          'description' => 'Kentang goreng renyah ditaburi bumbu keju bubuk melimpah.',                     'price' => 15000.00, 'stock' => 40,  'category_id' => $cat_cemilan, 'is_featured' => false],
+    ['name' => 'Roti Bakar Cokelat Keju',      'description' => 'Roti bakar empuk diisi cokelat lumer dan keju parut gurih.',                   'price' => 18000.00, 'stock' => 35,  'category_id' => $cat_cemilan, 'is_featured' => true],
+    ['name' => 'Puding Coklat Lava',           'description' => 'Puding cokelat lembut dengan saus fla vanila lezat di dalamnya.',              'price' => 12000.00, 'stock' => 20,  'category_id' => $cat_dessert, 'is_featured' => true],
 ];
 
 foreach ($products as $p) {
-    $stmt = $db->prepare("INSERT INTO products (seller_id, restaurant_id, category_id, name, description, price, stock, is_available, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)");
-    $stmt->execute([$seller_id, $restaurant_id, $p['category_id'], $p['name'], $p['description'], $p['price'], $p['stock'], $p['is_featured']]);
+    $stmt = $db->prepare("INSERT INTO products (seller_id, restaurant_id, category_id, name, description, price, stock, is_available, is_featured) VALUES (:seller_id, :restaurant_id, :category_id, :name, :description, :price, :stock, true, :is_featured)");
+    $stmt->bindValue(':seller_id', $seller_id, PDO::PARAM_INT);
+    $stmt->bindValue(':restaurant_id', $restaurant_id, PDO::PARAM_INT);
+    $stmt->bindValue(':category_id', $p['category_id'], PDO::PARAM_INT);
+    $stmt->bindValue(':name', $p['name']);
+    $stmt->bindValue(':description', $p['description']);
+    $stmt->bindValue(':price', $p['price']);
+    $stmt->bindValue(':stock', $p['stock'], PDO::PARAM_INT);
+    $stmt->bindValue(':is_featured', $p['is_featured'], PDO::PARAM_BOOL);
+    $stmt->execute();
 }
 echo "Seeded products.\n";
 
@@ -128,7 +143,7 @@ $addresses = [
         'address'        => 'Jl. Sudirman No. 21, Jakarta Selatan (Samping Gedung BNI)',
         'latitude'       => -6.21154400,
         'longitude'      => 106.82298000,
-        'is_default'     => 1
+        'is_default'     => true
     ],
     [
         'label'          => 'Kantor',
@@ -137,13 +152,21 @@ $addresses = [
         'address'        => 'Gedung Cyber 2, Lt. 17, Jl. HR Rasuna Said, Jakarta Selatan',
         'latitude'       => -6.22562200,
         'longitude'      => 106.83151200,
-        'is_default'     => 0
+        'is_default'     => false
     ]
 ];
 
 foreach ($addresses as $a) {
-    $stmt = $db->prepare("INSERT INTO buyer_addresses (user_id, label, recipient_name, phone, address, latitude, longitude, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$buyer_id, $a['label'], $a['recipient_name'], $a['phone'], $a['address'], $a['latitude'], $a['longitude'], $a['is_default']]);
+    $stmt = $db->prepare("INSERT INTO buyer_addresses (user_id, label, recipient_name, phone, address, latitude, longitude, is_default) VALUES (:user_id, :label, :recipient_name, :phone, :address, :latitude, :longitude, :is_default)");
+    $stmt->bindValue(':user_id', $buyer_id, PDO::PARAM_INT);
+    $stmt->bindValue(':label', $a['label']);
+    $stmt->bindValue(':recipient_name', $a['recipient_name']);
+    $stmt->bindValue(':phone', $a['phone']);
+    $stmt->bindValue(':address', $a['address']);
+    $stmt->bindValue(':latitude', $a['latitude']);
+    $stmt->bindValue(':longitude', $a['longitude']);
+    $stmt->bindValue(':is_default', $a['is_default'], PDO::PARAM_BOOL);
+    $stmt->execute();
 }
 echo "Seeded buyer addresses.\n";
 
@@ -170,7 +193,7 @@ $vouchers = [
 ];
 
 foreach ($vouchers as $v) {
-    $stmt = $db->prepare("INSERT INTO vouchers (code, discount_type, discount_value, min_order, max_discount, usage_limit, used_count, expired_at, is_active) VALUES (?, ?, ?, ?, ?, ?, 0, ?, 1)");
+    $stmt = $db->prepare("INSERT INTO vouchers (code, discount_type, discount_value, min_order, max_discount, usage_limit, used_count, expired_at, is_active) VALUES (?, ?, ?, ?, ?, ?, 0, ?, true)");
     $stmt->execute([$v['code'], $v['discount_type'], $v['discount_value'], $v['min_order'], $v['max_discount'], $v['usage_limit'], $v['expired_at']]);
 }
 echo "Seeded vouchers.\n";
@@ -178,7 +201,7 @@ echo "Seeded vouchers.\n";
 // 7. Seed Welcome Notification
 $notif_title = "Selamat Datang di NomNom! 🍜";
 $notif_msg   = "Akun Anda berhasil dibuat. Selamat menikmati layanan pesan antar makanan terbaik!";
-$sn = $db->prepare("INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, 'system', 0)");
+$sn = $db->prepare("INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, 'system', false)");
 $sn->execute([$buyer_id, $notif_title, $notif_msg]);
 echo "Seeded welcome notifications.\n";
 
