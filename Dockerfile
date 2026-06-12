@@ -1,16 +1,17 @@
 FROM php:8.2-apache
 
-# Install ekstensi PostgreSQL untuk PHP (wajib untuk PDO pgsql)
+# 1. Salin seluruh source code terlebih dahulu
+COPY . /var/www/html/
+
+# 2. Update sistem dan install ekstensi PostgreSQL
 RUN apt-get update && apt-get install -y libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql pgsql
 
-# Aktifkan modul rewrite Apache (agar file .htaccess bekerja jika ada)
-RUN a2enmod rewrite
+# 3. Bersihkan konflik MPM dengan memaksa mpm_prefork (Standar PHP-Apache)
+RUN a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork rewrite
 
-# Salin semua source code ke folder web server
-COPY . /var/www/html/
-
-# Atur permission agar Apache bisa membaca file dengan benar
+# 4. Amankan kembali permission folder
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
