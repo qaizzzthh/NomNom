@@ -11,7 +11,7 @@ if ($q !== '') {
     // Search restaurants
     $resto_query = "SELECT r.*,
         (SELECT COALESCE(AVG(rev.rating), 0) FROM review rev JOIN products prod ON rev.product_id = prod.id WHERE prod.restaurant_id = r.id) as rating_avg,
-        (SELECT COUNT(*) FROM products WHERE restaurant_id = r.id AND is_available = 1) as menu_count
+        (SELECT COUNT(*) FROM products WHERE restaurant_id = r.id AND is_available = TRUE) as menu_count
         FROM restaurants r
         WHERE r.status = 'active' AND r.name LIKE ?
         LIMIT 10";
@@ -24,7 +24,7 @@ if ($q !== '') {
     $prod_query = "SELECT p.*, r.name as resto_name, r.id as resto_id
         FROM products p
         JOIN restaurants r ON p.restaurant_id = r.id
-        WHERE p.is_available = 1 AND r.status = 'active' AND p.name LIKE ?
+        WHERE p.is_available = TRUE AND r.status = 'active' AND p.name LIKE ?
         LIMIT 20";
     $stmt2 = $db->prepare($prod_query);
     $stmt2->execute([$like_q]);

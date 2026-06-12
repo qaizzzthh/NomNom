@@ -1,9 +1,9 @@
 <?php
 // ─── SUPABASE POSTGRESQL CONFIGURATION ───────────────
-define('DB_HOST', 'db.ggcgucplxtyzpsydbsrj.supabase.co');
-define('DB_PORT', '5432');
+define('DB_HOST', 'aws-1-ap-southeast-1.pooler.supabase.com');
+define('DB_PORT', '6543');
 define('DB_NAME', 'postgres');
-define('DB_USER', 'postgres');
+define('DB_USER', 'postgres.ggcgucplxtyzpsydbsrj');
 define('DB_PASS', '54iKBBmIuxULKN2q');
 
 // Dynamic BASE_URL detection

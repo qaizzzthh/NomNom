@@ -11,12 +11,12 @@ switch ($action) {
         $id    = (int)($_GET['id'] ?? 0);
         $stmt  = $db->prepare("SELECT * FROM notifications WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $user['id']]);
-        $upd   = $db->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
+        $upd   = $db->prepare("UPDATE notifications SET is_read = TRUE WHERE id = ? AND user_id = ?");
         $upd->execute([$id, $user['id']]);
         redirect(BASE_URL . '/views/public/notifications.php');
         break;
     case 'read_all':
-        $upd = $db->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?");
+        $upd = $db->prepare("UPDATE notifications SET is_read = TRUE WHERE user_id = ?");
         $upd->execute([$user['id']]);
         redirect(BASE_URL . '/views/public/notifications.php');
         break;
@@ -24,7 +24,7 @@ switch ($action) {
         header('Content-Type: application/json');
         $last_id = (int)($_GET['last_id'] ?? 0);
 
-        $su = $db->prepare("SELECT COUNT(*) as c FROM notifications WHERE user_id = ? AND is_read = 0");
+        $su = $db->prepare("SELECT COUNT(*) as c FROM notifications WHERE user_id = ? AND is_read = FALSE");
         $su->execute([$user['id']]);
         $unread = (int)($su->fetch(PDO::FETCH_ASSOC)['c'] ?? 0);
 

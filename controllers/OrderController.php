@@ -59,7 +59,7 @@ function placeOrder(): void {
     // Hitung voucher
     $discount = 0;
     if ($voucher_id) {
-        $stmt4 = $db->prepare("SELECT * FROM vouchers WHERE id = ? AND is_active = 1 AND (expired_at IS NULL OR expired_at > NOW()) AND (usage_limit IS NULL OR used_count < usage_limit)");
+        $stmt4 = $db->prepare("SELECT * FROM vouchers WHERE id = ? AND is_active = TRUE AND (expired_at IS NULL OR expired_at > NOW()) AND (usage_limit IS NULL OR used_count < usage_limit)");
         $stmt4->execute([$voucher_id]);
         $v = $stmt4->fetch(PDO::FETCH_ASSOC);
         if ($v && $subtotal >= $v['min_order']) {
@@ -101,7 +101,7 @@ function placeOrder(): void {
             $us = $db->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
             $us->execute([$item['qty'], $item['product_id']]);
 
-            $ua = $db->prepare("UPDATE products SET is_available = 0 WHERE id = ? AND stock <= 0");
+            $ua = $db->prepare("UPDATE products SET is_available = FALSE WHERE id = ? AND stock <= 0");
             $ua->execute([$item['product_id']]);
         }
 
@@ -257,7 +257,7 @@ function cancelOrder(): void {
     $si->execute([$order_id]);
     $items = $si->fetchAll(PDO::FETCH_ASSOC);
     foreach ($items as $item) {
-        $us = $db->prepare("UPDATE products SET stock = stock + ?, is_available = 1 WHERE id = ?");
+        $us = $db->prepare("UPDATE products SET stock = stock + ?, is_available = TRUE WHERE id = ?");
         $us->execute([$item['qty'], $item['product_id']]);
     }
     $uo = $db->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");

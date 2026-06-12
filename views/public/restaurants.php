@@ -6,9 +6,9 @@ $resto_query = "SELECT r.*, u.name as seller_name, COUNT(DISTINCT p.id) as menu_
     (SELECT COALESCE(AVG(rev.rating), 0) FROM review rev JOIN products prod ON rev.product_id = prod.id WHERE prod.restaurant_id = r.id) as rating_avg
     FROM restaurants r
     JOIN users u ON r.seller_id = u.id
-    LEFT JOIN products p ON p.restaurant_id = r.id AND p.is_available = 1
+    LEFT JOIN products p ON p.restaurant_id = r.id AND p.is_available = TRUE
     WHERE r.status = 'active'
-    GROUP BY r.id
+    GROUP BY r.id, u.name
     ORDER BY rating_avg DESC, r.created_at DESC";
 $rq = $db->query($resto_query);
 $restaurants = $rq->fetchAll(PDO::FETCH_ASSOC);

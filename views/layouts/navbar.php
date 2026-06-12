@@ -39,7 +39,7 @@ $role = $user['role'] ?? 'public';
         <button class="btn-icon" id="notifBtn" title="Notifikasi">
           <i class="fa fa-bell"></i>
           <?php
-          $ucq = $db->prepare("SELECT COUNT(*) as c FROM notifications WHERE user_id = ? AND is_read = 0");
+          $ucq = $db->prepare("SELECT COUNT(*) as c FROM notifications WHERE user_id = ? AND is_read = FALSE");
           $ucq->execute([$user['id']]);
           $unread = $ucq->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
           ?>

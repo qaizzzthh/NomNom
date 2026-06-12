@@ -3,7 +3,7 @@ require_once __DIR__ . '/config/database.php';
 $db = getDB();
 
 // Ambil semua kategori
-$cq = $db->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name");
+$cq = $db->query("SELECT * FROM categories WHERE is_active = TRUE ORDER BY name");
 $categories = $cq->fetchAll(PDO::FETCH_ASSOC);
 
 // Filter kategori
@@ -14,9 +14,9 @@ $resto_query = "SELECT r.*, u.name as seller_name, COUNT(DISTINCT p.id) as menu_
     (SELECT COALESCE(AVG(rev.rating), 0) FROM review rev JOIN products prod ON rev.product_id = prod.id WHERE prod.restaurant_id = r.id) as rating_avg
     FROM restaurants r
     JOIN users u ON r.seller_id = u.id
-    LEFT JOIN products p ON p.restaurant_id = r.id AND p.is_available = 1
+    LEFT JOIN products p ON p.restaurant_id = r.id AND p.is_available = TRUE
     WHERE r.status = 'active'
-    GROUP BY r.id
+    GROUP BY r.id, u.name
     ORDER BY rating_avg DESC, r.created_at DESC
     LIMIT 12";
 $rq = $db->query($resto_query);
@@ -24,8 +24,8 @@ $restaurants = $rq->fetchAll(PDO::FETCH_ASSOC);
 
 // Produk featured
 $featured_q = $cat_filter
-    ? "SELECT p.*, r.name as resto_name, c.name as cat_name FROM products p JOIN restaurants r ON p.restaurant_id = r.id JOIN categories c ON p.category_id = c.id WHERE p.is_featured = 1 AND p.is_available = 1 AND r.status = 'active' AND p.category_id = $cat_filter ORDER BY p.id DESC LIMIT 12"
-    : "SELECT p.*, r.name as resto_name, c.name as cat_name FROM products p JOIN restaurants r ON p.restaurant_id = r.id JOIN categories c ON p.category_id = c.id WHERE p.is_featured = 1 AND p.is_available = 1 AND r.status = 'active' ORDER BY p.id DESC LIMIT 12";
+    ? "SELECT p.*, r.name as resto_name, c.name as cat_name FROM products p JOIN restaurants r ON p.restaurant_id = r.id JOIN categories c ON p.category_id = c.id WHERE p.is_featured = TRUE AND p.is_available = TRUE AND r.status = 'active' AND p.category_id = $cat_filter ORDER BY p.id DESC LIMIT 12"
+    : "SELECT p.*, r.name as resto_name, c.name as cat_name FROM products p JOIN restaurants r ON p.restaurant_id = r.id JOIN categories c ON p.category_id = c.id WHERE p.is_featured = TRUE AND p.is_available = TRUE AND r.status = 'active' ORDER BY p.id DESC LIMIT 12";
 $fq = $db->query($featured_q);
 $featured = $fq->fetchAll(PDO::FETCH_ASSOC);
 

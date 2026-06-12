@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = sanitize($_POST['description'] ?? '');
         $icon = sanitize($_POST['icon'] ?? '🍴');
         
-        $stmt = $db->prepare("INSERT INTO categories (name, description, icon, is_active) VALUES (?, ?, ?, 1)");
+        $stmt = $db->prepare("INSERT INTO categories (name, description, icon, is_active) VALUES (?, ?, ?, TRUE)");
         if ($stmt->execute([$name, $description, $icon])) {
             flash('success', 'Kategori baru berhasil ditambahkan!');
         } else {
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = sanitize($_POST['name'] ?? '');
         $description = sanitize($_POST['description'] ?? '');
         $icon = sanitize($_POST['icon'] ?? '🍴');
-        $is_active = isset($_POST['is_active']) ? 1 : 0;
+        $is_active = isset($_POST['is_active']) ? true : false;
         
         $stmt = $db->prepare("UPDATE categories SET name = ?, description = ?, icon = ?, is_active = ? WHERE id = ?");
         if ($stmt->execute([$name, $description, $icon, $is_active, $id])) {

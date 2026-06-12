@@ -7,7 +7,7 @@ $db = getDB();
 // Aggregations
 $qu = $db->query("SELECT COUNT(*) as c FROM users"); $users_count = $qu->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
 $qr = $db->query("SELECT COUNT(*) as c FROM restaurants WHERE status = 'active'"); $restaurants_count = $qr->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
-$qpu = $db->query("SELECT COUNT(*) as c FROM users WHERE is_verified = 0 AND role IN ('seller', 'driver')"); $pending_users = $qpu->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
+$qpu = $db->query("SELECT COUNT(*) as c FROM users WHERE is_verified = FALSE AND role IN ('seller', 'driver')"); $pending_users = $qpu->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
 $qpp = $db->query("SELECT COUNT(*) as c FROM payments WHERE status = 'pending'"); $pending_payments = $qpp->fetch(PDO::FETCH_ASSOC)['c'] ?? 0;
 
 $title = 'Admin Dashboard';

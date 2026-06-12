@@ -27,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $price = (float)($_POST['price'] ?? 0.0);
         $stock = (int)($_POST['stock'] ?? 0);
         $category_id = (int)($_POST['category_id'] ?? 0);
-        $is_featured = isset($_POST['is_featured']) ? 1 : 0;
-        $is_available = isset($_POST['is_available']) ? 1 : 0;
+        $is_featured = isset($_POST['is_featured']) ? true : false;
+        $is_available = isset($_POST['is_available']) ? true : false;
 
         $image = null;
         if (!empty($_FILES['image']['name'])) {
@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $price = (float)($_POST['price'] ?? 0.0);
         $stock = (int)($_POST['stock'] ?? 0);
         $category_id = (int)($_POST['category_id'] ?? 0);
-        $is_featured = isset($_POST['is_featured']) ? 1 : 0;
-        $is_available = isset($_POST['is_available']) ? 1 : 0;
+        $is_featured = isset($_POST['is_featured']) ? true : false;
+        $is_available = isset($_POST['is_available']) ? true : false;
 
         // Fetch current image
         $pq = $db->prepare("SELECT image FROM products WHERE id = ? AND restaurant_id = ?");
@@ -85,7 +85,7 @@ if (isset($_GET['delete_id'])) {
 }
 
 // Fetch all categories
-$cq = $db->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name");
+$cq = $db->query("SELECT * FROM categories WHERE is_active = TRUE ORDER BY name");
 $categories = $cq->fetchAll(PDO::FETCH_ASSOC);
 
 $pq2 = $db->prepare("SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.restaurant_id = ? ORDER BY p.id DESC");

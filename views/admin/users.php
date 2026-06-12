@@ -7,7 +7,7 @@ $db = getDB();
 // Handle verify
 if (isset($_GET['verify_id'])) {
     $verify_id = (int)$_GET['verify_id'];
-    $upd = $db->prepare("UPDATE users SET is_verified = 1 WHERE id = ?");
+    $upd = $db->prepare("UPDATE users SET is_verified = TRUE WHERE id = ?");
     $upd->execute([$verify_id]);
 
     $su = $db->prepare("SELECT * FROM users WHERE id = ?");
@@ -29,7 +29,7 @@ if (isset($_GET['toggle_id'])) {
     $su->execute([$toggle_id]);
     $u = $su->fetch(PDO::FETCH_ASSOC);
     if ($u) {
-        $new_state = $u['is_active'] ? 0 : 1;
+        $new_state = $u['is_active'] ? false : true;
         $upd = $db->prepare("UPDATE users SET is_active = ? WHERE id = ?");
         $upd->execute([$new_state, $toggle_id]);
         flash('success', 'Status keaktifan user berhasil diperbarui.');

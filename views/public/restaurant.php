@@ -20,11 +20,11 @@ if (!$resto) {
 }
 
 // Get categories present in this restaurant's products
-$cq = $db->prepare("SELECT DISTINCT c.* FROM categories c JOIN products p ON p.category_id = c.id WHERE p.restaurant_id = ? AND p.is_available = 1");
+$cq = $db->prepare("SELECT DISTINCT c.* FROM categories c JOIN products p ON p.category_id = c.id WHERE p.restaurant_id = ? AND p.is_available = TRUE");
 $cq->execute([$restaurant_id]);
 $categories = $cq->fetchAll(PDO::FETCH_ASSOC);
 
-$pq = $db->prepare("SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.restaurant_id = ? AND p.is_available = 1 ORDER BY p.is_featured DESC, p.name ASC");
+$pq = $db->prepare("SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.restaurant_id = ? AND p.is_available = TRUE ORDER BY p.is_featured DESC, p.name ASC");
 $pq->execute([$restaurant_id]);
 $products = $pq->fetchAll(PDO::FETCH_ASSOC);
 

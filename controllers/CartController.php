@@ -28,7 +28,7 @@ function addToCart(): void {
     $notes      = sanitize($_POST['notes'] ?? '');
 
     // Cek produk ada dan available
-    $stmt = $db->prepare("SELECT * FROM products WHERE id = ? AND is_available = 1 AND stock > 0");
+    $stmt = $db->prepare("SELECT * FROM products WHERE id = ? AND is_available = TRUE AND stock > 0");
     $stmt->execute([$product_id]);
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$product) {

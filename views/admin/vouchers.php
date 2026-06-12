@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $usage_limit = (int)($_POST['usage_limit'] ?? 0) ?: null;
         $expired_at = $_POST['expired_at'] ? date('Y-m-d H:i:s', strtotime($_POST['expired_at'])) : null;
         
-        $stmt = $db->prepare("INSERT INTO vouchers (code, discount_type, discount_value, min_order, max_discount, usage_limit, expired_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
+        $stmt = $db->prepare("INSERT INTO vouchers (code, discount_type, discount_value, min_order, max_discount, usage_limit, expired_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)");
         if ($stmt->execute([$code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at])) {
             flash('success', 'Voucher baru berhasil dibuat!');
         } else {
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $max_discount = (float)($_POST['max_discount'] ?? 0.0) ?: null;
         $usage_limit = (int)($_POST['usage_limit'] ?? 0) ?: null;
         $expired_at = $_POST['expired_at'] ? date('Y-m-d H:i:s', strtotime($_POST['expired_at'])) : null;
-        $is_active = isset($_POST['is_active']) ? 1 : 0;
+        $is_active = isset($_POST['is_active']) ? true : false;
         
         $stmt = $db->prepare("UPDATE vouchers SET code = ?, discount_type = ?, discount_value = ?, min_order = ?, max_discount = ?, usage_limit = ?, expired_at = ?, is_active = ? WHERE id = ?");
         if ($stmt->execute([$code, $discount_type, $discount_value, $min_order, $max_discount, $usage_limit, $expired_at, $is_active, $id])) {

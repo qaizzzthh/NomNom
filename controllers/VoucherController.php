@@ -10,7 +10,7 @@ if ($action === 'check') {
     $code  = sanitize($_GET['code'] ?? '');
     $total = (float)($_GET['total'] ?? 0);
 
-    $stmt = $db->prepare("SELECT * FROM vouchers WHERE code = ? AND is_active = 1 AND (expired_at IS NULL OR expired_at > NOW()) AND (usage_limit IS NULL OR used_count < usage_limit)");
+    $stmt = $db->prepare("SELECT * FROM vouchers WHERE code = ? AND is_active = TRUE AND (expired_at IS NULL OR expired_at > NOW()) AND (usage_limit IS NULL OR used_count < usage_limit)");
     $stmt->execute([$code]);
     $v = $stmt->fetch(PDO::FETCH_ASSOC);
 

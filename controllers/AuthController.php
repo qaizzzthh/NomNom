@@ -44,9 +44,9 @@ function handleRegister(): void {
     }
 
     $hashed      = password_hash($password, PASSWORD_BCRYPT);
-    $is_verified = ($role === 'buyer') ? 1 : 0;
+    $is_verified = ($role === 'buyer') ? true : false;
 
-    $stmt = $db->prepare("INSERT INTO users (name, email, password, phone, role, is_verified, is_active) VALUES (?,?,?,?,?,?,1)");
+    $stmt = $db->prepare("INSERT INTO users (name, email, password, phone, role, is_verified, is_active) VALUES (?,?,?,?,?,?,TRUE)");
     $stmt->execute([$name, $email, $hashed, $phone, $role, $is_verified]);
 
     if ($stmt->rowCount() > 0) {
@@ -77,7 +77,7 @@ function handleLogin(): void {
         return;
     }
 
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = ? AND is_active = 1 LIMIT 1");
+    $stmt = $db->prepare("SELECT * FROM users WHERE email = ? AND is_active = TRUE LIMIT 1");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

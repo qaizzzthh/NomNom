@@ -13,10 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $address = sanitize($_POST['address'] ?? '');
     $lat = (float)($_POST['latitude'] ?? 0.0) ?: -6.17539240; // Jakarta default
     $lon = (float)($_POST['longitude'] ?? 0.0) ?: 106.82715280;
-    $is_default = isset($_POST['is_default']) ? 1 : 0;
+    $is_default = isset($_POST['is_default']) ? true : false;
 
     if ($is_default) {
-        $ud = $db->prepare("UPDATE buyer_addresses SET is_default = 0 WHERE user_id = ?");
+        $ud = $db->prepare("UPDATE buyer_addresses SET is_default = FALSE WHERE user_id = ?");
         $ud->execute([$user['id']]);
     }
 
@@ -32,9 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Handle set default
 if (isset($_GET['default_id'])) {
     $default_id = (int)$_GET['default_id'];
-    $ud1 = $db->prepare("UPDATE buyer_addresses SET is_default = 0 WHERE user_id = ?");
+    $ud1 = $db->prepare("UPDATE buyer_addresses SET is_default = FALSE WHERE user_id = ?");
     $ud1->execute([$user['id']]);
-    $ud2 = $db->prepare("UPDATE buyer_addresses SET is_default = 1 WHERE id = ? AND user_id = ?");
+    $ud2 = $db->prepare("UPDATE buyer_addresses SET is_default = TRUE WHERE id = ? AND user_id = ?");
     $ud2->execute([$default_id, $user['id']]);
     flash('success', 'Alamat utama berhasil diperbarui.');
     redirect(BASE_URL . '/views/buyer/addresses.php');
