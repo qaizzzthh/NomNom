@@ -1,10 +1,11 @@
 <?php
 // ─── SUPABASE POSTGRESQL CONFIGURATION ───────────────
-define('DB_HOST', 'aws-1-ap-southeast-1.pooler.supabase.com');
-define('DB_PORT', '6543');
-define('DB_NAME', 'postgres');
-define('DB_USER', 'postgres.ggcgucplxtyzpsydbsrj');
-define('DB_PASS', '54iKBBmIuxULKN2q');
+// Menggunakan getenv() agar aman saat dideploy ke Render
+define('DB_HOST', getenv('DB_HOST') ?: 'aws-1-ap-southeast-1.pooler.supabase.com');
+define('DB_PORT', getenv('DB_PORT') ?: '6543');
+define('DB_NAME', getenv('DB_NAME') ?: 'postgres');
+define('DB_USER', getenv('DB_USER') ?: 'postgres.ggcgucplxtyzpsydbsrj');
+define('DB_PASS', getenv('DB_PASS') ?: '54iKBBmIuxULKN2q');
 
 // Dynamic BASE_URL detection
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? 80) == 443) ? "https://" : "http://";
@@ -12,12 +13,18 @@ $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $projectRoot = str_replace('\\', '/', dirname(__DIR__));
 $docRoot = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? '');
 
-if (!empty($docRoot) && strpos($projectRoot, $docRoot) === 0) {
-    $relativePath = substr($projectRoot, strlen($docRoot));
-    $baseUrl = $protocol . $host . '/' . trim($relativePath, '/');
+if ($host === 'localhost' || strpos($host, '127.0.0.1') !== false) {
+    if (!empty($docRoot) && strpos($projectRoot, $docRoot) === 0) {
+        $relativePath = substr($projectRoot, strlen($docRoot));
+        $baseUrl = $protocol . $host . '/' . trim($relativePath, '/');
+    } else {
+        $baseUrl = $protocol . $host . '/NomNom';
+    }
 } else {
-    $baseUrl = $protocol . $host . '/NomNom';
+    // Di Render, aplikasi langsung diakses via domain utama tanpa subfolder
+    $baseUrl = $protocol . $host;
 }
+
 $baseUrl = rtrim($baseUrl, '/');
 define('BASE_URL', $baseUrl);
 
