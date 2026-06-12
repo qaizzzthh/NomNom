@@ -1,0 +1,11 @@
+# Abaikan folder git dan log
+.git
+.github
+*.log
+
+# Abaikan konfigurasi Apache/XAMPP/Laragon lokal yang mungkin terbawa
+.htaccess
+apache/
+apache2/
+httpd.conf
+php.ini

@@ -1,17 +1,21 @@
-FROM php:8.2-apache
+FROM php:8.2-alpine
 
-# 1. Salin seluruh source code terlebih dahulu
-COPY . /var/www/html/
-
-# 2. Update sistem dan install ekstensi PostgreSQL
-RUN apt-get update && apt-get install -y libpq-dev \
+# Install Apache dan ekstensi PostgreSQL yang dibutuhkan
+RUN apk update && apk add --no-cache \
+    apache2 \
+    postgresql-dev \
     && docker-php-ext-install pdo pdo_pgsql pgsql
 
-# 3. Bersihkan konflik MPM dengan memaksa mpm_prefork (Standar PHP-Apache)
-RUN a2dismod mpm_event mpm_worker || true \
-    && a2enmod mpm_prefork rewrite
+# Buat direktori kerja untuk aplikasi
+WORKDIR /var/www/localhost/htdocs
 
-# 4. Amankan kembali permission folder
-RUN chown -R www-data:www-data /var/www/html
+# Salin semua source code aplikasi kamu
+COPY . .
+
+# Pastikan hak akses file diatur dengan benar untuk Apache di Alpine
+RUN chown -R apache:apache /var/www/localhost/htdocs
+
+# Jalankan Apache di foreground agar kontainer tidak mati
+CMD ["httpd", "-D", "FOREGROUND"]
 
 EXPOSE 80
