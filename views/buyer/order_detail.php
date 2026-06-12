@@ -7,9 +7,10 @@ $user = currentUser();
 $order_id = (int)($_GET['id'] ?? 0);
 
 // Fetch order
-$soq = $db->prepare("SELECT o.*, r.name as resto_name, r.address as resto_addr, r.phone as resto_phone, d.name as driver_name, d.phone as driver_phone
+$soq = $db->prepare("SELECT o.*, r.name as resto_name, r.address as resto_addr, u.phone as resto_phone, d.name as driver_name, d.phone as driver_phone
     FROM orders o
     JOIN restaurants r ON o.restaurant_id = r.id
+    JOIN users u ON r.seller_id = u.id
     LEFT JOIN users d ON o.driver_id = d.id
     WHERE o.id = ?");
 $soq->execute([$order_id]);

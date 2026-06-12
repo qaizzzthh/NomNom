@@ -6,9 +6,10 @@ $db = getDB();
 $user = currentUser();
 
 // Fetch active order
-$oq = $db->prepare("SELECT o.*, r.name as resto_name, r.address as resto_addr, r.phone as resto_phone, a.address as buyer_addr, a.recipient_name, a.phone as buyer_phone, p.payment_method, p.status as payment_status 
+$oq = $db->prepare("SELECT o.*, r.name as resto_name, r.address as resto_addr, u.phone as resto_phone, a.address as buyer_addr, a.recipient_name, a.phone as buyer_phone, p.payment_method, p.status as payment_status 
                      FROM orders o 
                      JOIN restaurants r ON o.restaurant_id = r.id 
+                     JOIN users u ON r.seller_id = u.id
                      JOIN buyer_addresses a ON o.address_id = a.id
                      JOIN payments p ON p.order_id = o.id
                      WHERE o.driver_id = ? AND o.status = 'on_delivery' 

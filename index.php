@@ -125,7 +125,10 @@ ob_start();
   </div>
   <?php else: ?>
   <div class="restaurants-grid">
-    <?php foreach ($restaurants as $r): ?>
+    <?php foreach ($restaurants as $r): 
+        $now_time = date('H:i:s');
+        $is_open = ($now_time >= $r['open_time'] && $now_time <= $r['close_time']);
+    ?>
     <a href="<?= BASE_URL ?>/views/public/restaurant.php?id=<?= $r['id'] ?>" style="color:inherit">
       <div class="restaurant-card">
         <?php if ($r['banner']): ?>
@@ -154,8 +157,8 @@ ob_start();
             <span>🕐 <?= date('H:i', strtotime($r['open_time'])) ?>–<?= date('H:i', strtotime($r['close_time'])) ?></span>
             <span>💰 Min. <?= formatRupiah($r['min_order']) ?></span>
           </div>
-          <span class="restaurant-tag <?= $r['is_open'] ? 'open-badge' : 'closed-badge' ?>">
-            <?= $r['is_open'] ? '🟢 Buka' : '🔴 Tutup' ?>
+          <span class="restaurant-tag <?= $is_open ? 'open-badge' : 'closed-badge' ?>">
+            <?= $is_open ? '🟢 Buka' : '🔴 Tutup' ?>
           </span>
         </div>
       </div>
