@@ -1,24 +1,33 @@
-FROM php:8.2-alpine
+FROM php:8.2-apache
 
-# Install Apache dan ekstensi PostgreSQL yang dibutuhkan
-RUN apk update && apk add --no-cache \
-    apache2 \
-    postgresql-dev \
-    && docker-php-ext-install pdo pdo_pgsql pgsql
+# Install PostgreSQL client dev packages and PDO extensions
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Buat direktori kerja untuk aplikasi
-WORKDIR /var/www/localhost/htdocs
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
-# Hapus file index.html bawaan Apache yang menampilkan "It works!"
-RUN rm -f index.html
+# Use the production configuration template
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Salin semua source code aplikasi kamu
+# Increase upload limit to accommodate files up to 5MB (set to 20M for safety)
+RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 20M/g' "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/post_max_size = 8M/post_max_size = 20M/g' "$PHP_INI_DIR/php.ini"
+
+# Set working directory to standard Apache document root
+WORKDIR /var/www/html
+
+# Copy application source code
 COPY . .
 
-# Pastikan hak akses file diatur dengan benar untuk Apache di Alpine
-RUN chown -R apache:apache /var/www/localhost/htdocs
+# Pre-create upload directories and ensure proper permissions for www-data
+RUN mkdir -p uploads/restaurants uploads/products uploads/avatars uploads/payments uploads/reviews && \
+    chown -R www-data:www-data /var/www/html
 
-# Jalankan Apache di foreground agar kontainer tidak mati
-CMD ["httpd", "-D", "FOREGROUND"]
-
+# Expose port 80 (standard Apache port, Render routes traffic here)
 EXPOSE 80
+
+# Run Apache in foreground
+CMD ["apache2-foreground"]

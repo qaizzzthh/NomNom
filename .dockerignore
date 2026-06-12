@@ -1,11 +1,32 @@
-# Abaikan folder git dan log
+# Abaikan folder git dan metadata
 .git
 .github
+
+# Abaikan logs
 *.log
 
-# Abaikan konfigurasi Apache/XAMPP/Laragon lokal yang mungkin terbawa
-.htaccess
+# Abaikan database dump lokal
+database.sql
+
+# Abaikan local uploads (isi folder uploads)
+uploads/**/*
+!uploads/
+
+# Abaikan konfigurasi server lokal atau php/apache config cadangan
 apache/
 apache2/
 httpd.conf
 php.ini
+
+# Abaikan file sistem operasi
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Abaikan file konfigurasi IDE
+.vscode/
+.idea/
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
