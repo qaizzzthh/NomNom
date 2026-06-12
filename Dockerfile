@@ -29,5 +29,5 @@ RUN mkdir -p uploads/restaurants uploads/products uploads/avatars uploads/paymen
 # Expose port 80 (standard Apache port, Render routes traffic here)
 EXPOSE 80
 
-# Run Apache in foreground
-CMD ["apache2-foreground"]
+# Run Apache in foreground, ensuring only mpm_prefork is loaded to avoid conflicts on Railway
+CMD ["sh", "-c", "a2dismod mpm_event || true && a2dismod mpm_worker || true && a2enmod mpm_prefork && apache2-foreground"]
