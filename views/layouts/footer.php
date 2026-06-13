@@ -9,8 +9,8 @@ $role = $user['role'] ?? 'public';
       <!-- Brand -->
       <div class="footer-brand">
         <div class="footer-logo">
-          <span class="footer-logo-icon">🍜</span>
-          <span class="footer-logo-name">NomNom</span>
+          <img class="footer-logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo">
+          <span class="footer-logo-name">NomNom.id</span>
         </div>
         <p class="footer-tagline">
           Platform pesan antar makanan terpercaya. Ratusan restoran siap mengantarkan makanan lezat ke pintu Anda.
@@ -93,7 +93,7 @@ $role = $user['role'] ?? 'public';
     <!-- Footer Bottom -->
     <div class="footer-bottom">
       <div class="footer-bottom-left">
-        &copy; <?= date('Y') ?> <strong>NomNom Food Delivery</strong>. Semua hak dilindungi.
+        &copy; <?= date('Y') ?> <strong>NomNom.id Food Delivery</strong>. Semua hak dilindungi.
       </div>
       <div class="footer-bottom-right">
         Dibuat dengan ❤️ untuk Tugas Besar Pemrograman Web
@@ -133,12 +133,18 @@ footer {
   gap: 10px;
   margin-bottom: 14px;
 }
-.footer-logo-icon { font-size: 28px; }
+.footer-logo-icon { height: 36px; width: auto; object-fit: contain; }
 .footer-logo-name {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Montserrat Alternates', sans-serif;
   font-size: 24px;
-  font-weight: 700;
-  color: var(--accent);
+  font-weight: 900;
+  color: var(--primary-dark);
+  -webkit-text-stroke: 2px #ffffff;
+  text-shadow: 
+    -2px -2px 0 #ffffff,  
+     2px -2px 0 #ffffff,
+    -2px  2px 0 #ffffff,
+     2px  2px 0 #ffffff;
 }
 .footer-tagline {
   font-size: 13px;

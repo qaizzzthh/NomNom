@@ -32,9 +32,18 @@ ob_start();
   text-align: center;
   margin-bottom: 28px;
 }
-.auth-logo .logo-icon { font-size: 48px; display: block; margin-bottom: 8px; }
+.auth-logo .logo-icon { height: 64px; width: auto; display: block; margin: 0 auto 12px; }
 .auth-logo h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-.auth-logo h2 span { color: var(--primary); }
+.auth-logo h2 span {
+  font-family: 'Montserrat Alternates', sans-serif;
+  color: var(--primary-dark);
+  -webkit-text-stroke: 1.5px #ffffff;
+  text-shadow: 
+    -1.5px -1.5px 0 #ffffff,  
+     1.5px -1.5px 0 #ffffff,
+    -1.5px  1.5px 0 #ffffff,
+     1.5px  1.5px 0 #ffffff;
+}
 .auth-logo p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
 
 /* Role Selector */
@@ -169,8 +178,8 @@ ob_start();
 
     <!-- Logo -->
     <div class="auth-logo">
-      <span class="logo-icon">🍜</span>
-      <h2>Daftar di <span>NomNom</span></h2>
+      <img class="logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo">
+      <h2>Daftar di <span>NomNom.id</span></h2>
       <p>Buat akun gratis dan mulai memesan makanan</p>
     </div>
 
@@ -306,7 +315,7 @@ ob_start();
       <!-- Terms -->
       <label class="terms-check">
         <input type="checkbox" id="terms" required>
-        Saya menyetujui <a href="#">Syarat & Ketentuan</a> serta <a href="#">Kebijakan Privasi</a> NomNom.
+        Saya menyetujui <a href="#">Syarat & Ketentuan</a> serta <a href="#">Kebijakan Privasi</a> NomNom.id.
       </label>
 
       <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">

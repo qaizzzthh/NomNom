@@ -7,11 +7,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= $title ?? 'NomNom' ?> — NomNom Food Delivery</title>
+<title><?= $title ?? 'NomNom.id' ?> — NomNom.id Food Delivery</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@400;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
+<link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>/assets/images/NomNom.id.svg">
 <?= $extraCSS ?? '' ?>
 </head>
 <body class="role-<?= $role ?? 'public' ?>">

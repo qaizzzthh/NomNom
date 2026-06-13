@@ -68,8 +68,18 @@ button { cursor: pointer; font-family: var(--font); }
   color: white; font-weight: 800; font-size: 22px;
   letter-spacing: -0.5px;
 }
-.brand-logo { font-size: 26px; }
-.brand-name { font-family: var(--font-display); color: var(--accent); }
+.brand-logo { height: 36px; width: auto; object-fit: contain; }
+.brand-name {
+  font-family: 'Montserrat Alternates', sans-serif;
+  font-weight: 900;
+  color: var(--primary-dark);
+  -webkit-text-stroke: 2px #ffffff;
+  text-shadow: 
+    -2px -2px 0 #ffffff,  
+     2px -2px 0 #ffffff,
+    -2px  2px 0 #ffffff,
+     2px  2px 0 #ffffff;
+}
 
 .navbar-search { flex: 1; max-width: 500px; }
 .search-box {

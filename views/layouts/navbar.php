@@ -5,8 +5,8 @@ $role = $user['role'] ?? 'public';
 <nav class="navbar">
   <div class="navbar-brand">
     <a href="<?= BASE_URL ?>/index.php">
-      <span class="brand-logo">🍜</span>
-      <span class="brand-name">NomNom</span>
+      <img class="brand-logo" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo">
+      <span class="brand-name">NomNom.id</span>
     </a>
   </div>
 

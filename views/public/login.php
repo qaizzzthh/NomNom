@@ -20,9 +20,18 @@ ob_start();
   box-shadow: 0 20px 60px rgba(255,107,43,0.12);
 }
 .auth-logo { text-align: center; margin-bottom: 28px; }
-.auth-logo .logo-icon { font-size: 52px; display: block; margin-bottom: 8px; }
+.auth-logo .logo-icon { height: 72px; width: auto; display: block; margin: 0 auto 12px; }
 .auth-logo h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
-.auth-logo h2 span { color: var(--primary); }
+.auth-logo h2 span {
+  font-family: 'Montserrat Alternates', sans-serif;
+  color: var(--primary-dark);
+  -webkit-text-stroke: 1.5px #ffffff;
+  text-shadow: 
+    -1.5px -1.5px 0 #ffffff,  
+     1.5px -1.5px 0 #ffffff,
+    -1.5px  1.5px 0 #ffffff,
+     1.5px  1.5px 0 #ffffff;
+}
 .auth-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
 .auth-divider { text-align: center; color: var(--text-muted); font-size: 13px; margin: 20px 0; position: relative; }
 .auth-divider::before, .auth-divider::after {
@@ -35,8 +44,8 @@ ob_start();
 <div class="auth-wrapper">
   <div class="auth-card">
     <div class="auth-logo">
-      <span class="logo-icon">🍜</span>
-      <h2>Masuk ke <span>NomNom</span></h2>
+      <img class="logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo">
+      <h2>Masuk ke <span>NomNom.id</span></h2>
       <div class="auth-subtitle">Pesan makanan favoritmu sekarang</div>
     </div>
 
