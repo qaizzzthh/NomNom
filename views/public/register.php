@@ -32,7 +32,7 @@ ob_start();
   text-align: center;
   margin-bottom: 28px;
 }
-.auth-logo .logo-icon { height: 64px; width: auto; display: block; margin: 0 auto 12px; }
+.auth-logo .logo-icon { height: 64px; width: 76px; display: block; margin: 0 auto 12px; object-fit: contain; }
 .auth-logo h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
 .auth-logo h2 span {
   font-family: 'Montserrat Alternates', sans-serif;
@@ -178,7 +178,7 @@ ob_start();
 
     <!-- Logo -->
     <div class="auth-logo">
-      <img class="logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo">
+      <img class="logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo" width="76" height="64">
       <h2>Daftar di <span>NomNom.id</span></h2>
       <p>Buat akun gratis dan mulai memesan makanan</p>
     </div>

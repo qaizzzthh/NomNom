@@ -20,7 +20,7 @@ ob_start();
   box-shadow: 0 20px 60px rgba(255,107,43,0.12);
 }
 .auth-logo { text-align: center; margin-bottom: 28px; }
-.auth-logo .logo-icon { height: 72px; width: auto; display: block; margin: 0 auto 12px; }
+.auth-logo .logo-icon { height: 72px; width: 86px; display: block; margin: 0 auto 12px; object-fit: contain; }
 .auth-logo h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
 .auth-logo h2 span {
   font-family: 'Montserrat Alternates', sans-serif;
@@ -44,7 +44,7 @@ ob_start();
 <div class="auth-wrapper">
   <div class="auth-card">
     <div class="auth-logo">
-      <img class="logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo">
+      <img class="logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo" width="86" height="72">
       <h2>Masuk ke <span>NomNom.id</span></h2>
       <div class="auth-subtitle">Pesan makanan favoritmu sekarang</div>
     </div>

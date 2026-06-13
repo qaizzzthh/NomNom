@@ -9,7 +9,7 @@ $role = $user['role'] ?? 'public';
       <!-- Brand -->
       <div class="footer-brand">
         <div class="footer-logo">
-          <img class="footer-logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo">
+          <img class="footer-logo-icon" src="<?= BASE_URL ?>/assets/images/NomNom.id-Logo.svg" alt="NomNom.id Logo" width="43" height="36">
           <span class="footer-logo-name">NomNom.id</span>
         </div>
         <p class="footer-tagline">
@@ -133,18 +133,18 @@ footer {
   gap: 10px;
   margin-bottom: 14px;
 }
-.footer-logo-icon { height: 36px; width: auto; object-fit: contain; }
+.footer-logo-icon { width: 43px; height: 36px; object-fit: contain; }
 .footer-logo-name {
   font-family: 'Montserrat Alternates', sans-serif;
   font-size: 24px;
   font-weight: 900;
   color: var(--primary-dark);
-  -webkit-text-stroke: 2px #ffffff;
+  -webkit-text-stroke: 0.5px #ffffff;
   text-shadow: 
-    -2px -2px 0 #ffffff,  
-     2px -2px 0 #ffffff,
-    -2px  2px 0 #ffffff,
-     2px  2px 0 #ffffff;
+    -0.5px -0.5px 0 #ffffff,  
+     0.5px -0.5px 0 #ffffff,
+    -0.5px  0.5px 0 #ffffff,
+     0.5px  0.5px 0 #ffffff;
 }
 .footer-tagline {
   font-size: 13px;
