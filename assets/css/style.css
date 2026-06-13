@@ -1771,6 +1771,10 @@ footer a {
 }
 
 @media (max-width: 480px) {
+  .brand-name {
+    display: none;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
