@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS vouchers (
 );
 
 -- 7. Orders Table
+-- NOTE: PostgreSQL requires a serial default for id, ensure orders_id_seq exists and is set as DEFAULT for id.
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     order_code VARCHAR(100) UNIQUE NOT NULL,
@@ -148,6 +149,7 @@ CREATE TABLE IF NOT EXISTS review (
 );
 
 -- 12. Cart Table
+-- NOTE: UNIQUE constraint on (user_id, product_id) is mandatory for ON CONFLICT queries to work.
 CREATE TABLE IF NOT EXISTS cart (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
