@@ -29,8 +29,7 @@ $pq->execute([$restaurant_id]);
 $products = $pq->fetchAll(PDO::FETCH_ASSOC);
 
 // Check if open
-$now_time = date('H:i:s');
-$is_open = ($now_time >= $resto['open_time'] && $now_time <= $resto['close_time']);
+$is_open = isRestaurantOpen($resto['open_time'], $resto['close_time']);
 
 $title = $resto['name'];
 $role  = currentUser()['role'] ?? 'public';

@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Jakarta');
 // ─── SUPABASE POSTGRESQL CONFIGURATION ───────────────
 // Menggunakan getenv() agar aman saat dideploy ke Render
 define('DB_HOST', getenv('DB_HOST') ?: 'aws-1-ap-southeast-1.pooler.supabase.com');
@@ -47,6 +48,7 @@ function getDB(): PDO {
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ]);
+            $conn->exec("SET TIME ZONE 'Asia/Jakarta'");
         } catch (PDOException $e) {
             die(json_encode(['error' => 'Koneksi database gagal: ' . $e->getMessage()]));
         }
@@ -146,4 +148,19 @@ function statusLabel(string $status): string {
         'cancelled'   => '❌ Dibatalkan'
     ];
     return $labels[$status] ?? $status;
+}
+
+function isRestaurantOpen(?string $openTime, ?string $closeTime): bool {
+    if (!$openTime || !$closeTime) {
+        return false;
+    }
+    $now = date('H:i:s');
+    $open = date('H:i:s', strtotime($openTime));
+    $close = date('H:i:s', strtotime($closeTime));
+    
+    if ($open <= $close) {
+        return ($now >= $open && $now <= $close);
+    } else {
+        return ($now >= $open || $now <= $close);
+    }
 }

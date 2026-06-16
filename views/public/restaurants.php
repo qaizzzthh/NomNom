@@ -33,9 +33,7 @@ ob_start();
 <?php else: ?>
 <div class="restaurants-grid">
   <?php foreach ($restaurants as $r): 
-      // check if open
-      $now_time = date('H:i:s');
-      $is_open = ($now_time >= $r['open_time'] && $now_time <= $r['close_time']);
+      $is_open = isRestaurantOpen($r['open_time'], $r['close_time']);
   ?>
   <a href="<?= BASE_URL ?>/views/public/restaurant.php?id=<?= $r['id'] ?>" style="color:inherit">
     <div class="restaurant-card">
