@@ -135,3 +135,15 @@ function uploadFile(array $file, string $folder = 'products'): string|false {
     }
     return false;
 }
+
+function statusLabel(string $status): string {
+    $labels = [
+        'pending'     => '⏳ Menunggu',
+        'confirmed'   => '✅ Dikonfirmasi',
+        'preparing'   => '👨‍🍳 Dimasak',
+        'on_delivery' => '🛵 Dikirim',
+        'delivered'   => '✅ Selesai',
+        'cancelled'   => '❌ Dibatalkan'
+    ];
+    return $labels[$status] ?? $status;
+}
