@@ -119,14 +119,15 @@ ob_start();
     <!-- VOUCHER -->
     <div class="card">
       <div class="card-header">
-        <h3>🎟️ Pakai Voucher</h3>
+        <h3>🎟️ Pakai Voucher <span style="font-size:11px; font-weight:400; color:var(--text-muted)">(opsional)</span></h3>
       </div>
       <div class="card-body">
         <div style="display:flex; gap:8px">
-          <input type="text" id="voucherCode" class="form-control" placeholder="Kode Voucher" style="text-transform:uppercase">
+          <input type="text" id="voucherCode" class="form-control" placeholder="Kode voucher (jika ada)" style="text-transform:uppercase">
           <button type="button" id="applyVoucher" class="btn btn-dark">Pakai</button>
         </div>
         <div id="voucherResult" style="margin-top:12px"></div>
+        <p style="font-size:11px; color:var(--text-muted); margin-top:8px">💡 Tidak wajib mengisi voucher untuk melanjutkan pembayaran</p>
       </div>
     </div>
 

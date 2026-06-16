@@ -110,10 +110,14 @@ ob_start();
         </div>
         <div class="product-card-footer">
           <span class="product-price"><?= formatRupiah($p['price']) ?></span>
-          <?php if (isLoggedIn() && $role === 'buyer' && $is_open && $p['stock'] > 0): ?>
-          <button class="btn-add-cart" data-id="<?= $p['id'] ?>" title="Tambah ke Keranjang">+</button>
-          <?php elseif ($p['stock'] <= 0): ?>
+          <?php if ($p['stock'] <= 0): ?>
           <span style="font-size:12px; color:var(--danger); font-weight:700">Habis</span>
+          <?php elseif (!$is_open): ?>
+          <span style="font-size:11px; color:var(--text-muted); font-weight:600">🔴 Tutup</span>
+          <?php elseif (isLoggedIn() && $role === 'buyer'): ?>
+          <button class="btn-add-cart" data-id="<?= $p['id'] ?>" title="Tambah ke Keranjang">+</button>
+          <?php elseif (!isLoggedIn()): ?>
+          <a href="<?= BASE_URL ?>/views/public/login.php" class="btn btn-primary btn-sm" style="font-size:11px; padding:5px 12px">Login</a>
           <?php endif; ?>
         </div>
       </div>

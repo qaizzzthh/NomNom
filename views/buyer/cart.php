@@ -99,7 +99,8 @@ ob_start();
 <script>
 function clearCart() {
   if (confirm('Apakah Anda yakin ingin mengosongkan keranjang?')) {
-    fetch(`${BASE_URL}/controllers/CartController.php`, {
+    const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
+    fetch(`${baseUrl}/controllers/CartController.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'action=clear'

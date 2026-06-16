@@ -23,27 +23,41 @@ document.addEventListener('DOMContentLoaded', () => {
     a.style.transition = 'opacity 0.5s';
   });
 
-  // ── AJAX Add to Cart ────────────────────────────
-  document.querySelectorAll('.btn-add-cart').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      const productId = this.dataset.id;
-      const notes = this.dataset.notes || '';
-      fetch(`${BASE_URL}/controllers/CartController.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=add&product_id=${productId}&qty=1&notes=${encodeURIComponent(notes)}`
-      })
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          showToast('✅ Ditambahkan ke keranjang!');
-          updateCartBadge(data.cart_count);
-        } else {
-          showToast('❌ ' + (data.message || 'Gagal menambah ke keranjang'), 'error');
-        }
-      })
-      .catch(() => showToast('❌ Terjadi kesalahan', 'error'));
+  // ── AJAX Add to Cart (Event Delegation) ─────────
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-add-cart');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
+    const productId = btn.dataset.id;
+    const notes = btn.dataset.notes || '';
+
+    if (!productId) return;
+
+    // Visual feedback
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+
+    fetch(`${baseUrl}/controllers/CartController.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `action=add&product_id=${productId}&qty=1&notes=${encodeURIComponent(notes)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('✅ Ditambahkan ke keranjang!');
+        updateCartBadge(data.cart_count);
+      } else {
+        showToast('❌ ' + (data.message || 'Gagal menambah ke keranjang'), 'error');
+      }
+    })
+    .catch(() => showToast('❌ Terjadi kesalahan koneksi', 'error'))
+    .finally(() => {
+      btn.disabled = false;
+      btn.style.opacity = '';
     });
   });
 
@@ -305,8 +319,18 @@ function updateCartTotal(total) {
 }
 
 function filterByCategory(cat) {
+  // Cari .product-card-wrap[data-category] (used in restaurant.php)
+  const wraps = document.querySelectorAll('.product-card-wrap[data-category]');
+  if (wraps.length > 0) {
+    wraps.forEach(wrap => {
+      wrap.style.display =
+        (cat === 'all' || wrap.dataset.category === cat) ? '' : 'none';
+    });
+    return;
+  }
+  // Fallback: cari .product-card[data-category] (used in index.php)
   document.querySelectorAll('.product-card[data-category]').forEach(card => {
-    card.closest('.product-card-wrap').style.display =
+    card.style.display =
       (cat === 'all' || card.dataset.category === cat) ? '' : 'none';
   });
 }
