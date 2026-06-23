@@ -45,7 +45,7 @@ ob_start();
   </div>
 </div>
 
-<div style="display:grid; grid-template-columns: 2fr 1fr; gap:28px; align-items:start">
+<div class="checkout-grid">
   <!-- DETAILS -->
   <form action="<?= BASE_URL ?>/controllers/OrderController.php?action=place" method="POST" id="checkoutForm">
     <div style="display:grid; gap:24px">

@@ -168,12 +168,32 @@ function sellerConfirm(): void {
         return;
     }
 
-    $upd = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
-    $upd->execute([$new_status, $order_id]);
-    insertTracking($order_id, $new_status, statusMessage($new_status), $user['id']);
-    sendNotif($order['buyer_id'], "Status Pesanan Diperbarui", "Pesanan {$order['order_code']} " . statusMessage($new_status), 'order', $order_id);
+    $db->beginTransaction();
+    try {
+        if ($new_status === 'cancelled') {
+            // Kembalikan stok
+            $si = $db->prepare("SELECT * FROM order_items WHERE order_id = ?");
+            $si->execute([$order_id]);
+            $items = $si->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($items as $item) {
+                $us = $db->prepare("UPDATE products SET stock = stock + ?, is_available = TRUE WHERE id = ?");
+                $us->execute([$item['qty'], $item['product_id']]);
+            }
+        }
 
-    flash('success', 'Status pesanan berhasil diperbarui.');
+        $upd = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
+        $upd->execute([$new_status, $order_id]);
+        
+        insertTracking($order_id, $new_status, statusMessage($new_status), $user['id']);
+        sendNotif($order['buyer_id'], "Status Pesanan Diperbarui", "Pesanan {$order['order_code']} " . statusMessage($new_status), 'order', $order_id);
+        
+        $db->commit();
+        flash('success', 'Status pesanan berhasil diperbarui.');
+    } catch (Exception $e) {
+        $db->rollBack();
+        flash('error', 'Gagal memperbarui status pesanan: ' . $e->getMessage());
+    }
+    
     redirect(BASE_URL . '/views/seller/orders.php');
 }
 

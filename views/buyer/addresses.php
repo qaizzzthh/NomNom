@@ -56,6 +56,8 @@ $addresses = $aq->fetchAll(PDO::FETCH_ASSOC);
 
 $title = 'Kelola Alamat';
 $role  = 'buyer';
+$extraCSS = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />';
+$extraJS = '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="' . BASE_URL . '/assets/js/map_picker.js"></script>';
 ob_start();
 ?>
 <div class="page-header">
@@ -130,16 +132,20 @@ ob_start();
         </div>
         <div class="form-group" style="margin:0">
           <label class="form-label">Alamat Lengkap <span class="required">*</span></label>
-          <textarea name="address" class="form-control" placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan/kecamatan" style="min-height:80px" required></textarea>
+          <textarea name="address" id="address-input" class="form-control" placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan/kecamatan" style="min-height:80px" required></textarea>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Tandai Lokasi di Peta</label>
+          <div id="map-picker" class="map-picker"></div>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
           <div class="form-group" style="margin:0">
             <label class="form-label">Latitude (Opsional)</label>
-            <input type="number" step="any" name="latitude" class="form-control" placeholder="-6.17539">
+            <input type="number" step="any" name="latitude" id="lat-input" class="form-control" placeholder="-6.17539">
           </div>
           <div class="form-group" style="margin:0">
             <label class="form-label">Longitude (Opsional)</label>
-            <input type="number" step="any" name="longitude" class="form-control" placeholder="106.8271">
+            <input type="number" step="any" name="longitude" id="lon-input" class="form-control" placeholder="106.8271">
           </div>
         </div>
         <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer">

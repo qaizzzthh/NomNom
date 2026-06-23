@@ -16,6 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDropdown('notifBtn', 'notifDropdown');
   setupDropdown('userMenuBtn', 'userDropdown');
 
+  // ── Hamburger Toggle (Mobile Sidebar) ───────────
+  const hamburger = document.getElementById('hamburger');
+  const sidebar = document.querySelector('.sidebar');
+  if (hamburger && sidebar) {
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('active');
+    });
+    // Close sidebar when clicking outside
+    document.addEventListener('click', (e) => {
+      if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== hamburger) {
+        sidebar.classList.remove('active');
+      }
+    });
+  }
+
   // ── Auto-dismiss alerts ─────────────────────────
   document.querySelectorAll('.alert').forEach(a => {
     setTimeout(() => a.style.opacity = '0', 4000);

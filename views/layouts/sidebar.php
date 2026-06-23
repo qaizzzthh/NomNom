@@ -1,12 +1,23 @@
 <?php
 $user = currentUser();
-$role = $user['role'] ?? 'buyer';
+$role = $user['role'] ?? 'public';
 $current = basename($_SERVER['PHP_SELF']);
 ?>
 <aside class="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-role-label"><?= ucfirst($role) ?> Panel</div>
+    <div class="sidebar-role-label"><?= $role === 'public' ? 'Menu' : ucfirst($role) . ' Panel' ?></div>
   </div>
+
+  <?php if ($role === 'buyer' || $role === 'public'): ?>
+  <div class="sidebar-search-mobile" style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <form action="<?= BASE_URL ?>/views/public/search.php" method="GET">
+      <div class="search-box" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50px; padding: 6px 12px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa fa-search" style="color: rgba(255,255,255,0.5); font-size: 12px;"></i>
+        <input type="text" name="q" placeholder="Cari makanan..." value="<?= sanitize($_GET['q'] ?? '') ?>" style="background: none; border: none; outline: none; color: white; font-size: 12px; width: 100%;">
+      </div>
+    </form>
+  </div>
+  <?php endif; ?>
 
   <nav class="sidebar-nav">
     <?php if ($role === 'seller'): ?>
@@ -80,12 +91,42 @@ $current = basename($_SERVER['PHP_SELF']);
     <a href="<?= BASE_URL ?>/views/driver/history.php" class="<?= $current === 'history.php' ? 'active' : '' ?>">
       <i class="fa fa-history"></i> <span>Riwayat</span>
     </a>
+
+    <?php elseif ($role === 'buyer'): ?>
+    <a href="<?= BASE_URL ?>/index.php" class="<?= $current === 'index.php' || $current === '' ? 'active' : '' ?>">
+      <i class="fa fa-home"></i> <span>Beranda</span>
+    </a>
+    <a href="<?= BASE_URL ?>/views/buyer/profile.php" class="<?= $current === 'profile.php' ? 'active' : '' ?>">
+      <i class="fa fa-user"></i> <span>Profil Saya</span>
+    </a>
+    <a href="<?= BASE_URL ?>/views/buyer/orders.php" class="<?= $current === 'orders.php' ? 'active' : '' ?>">
+      <i class="fa fa-box"></i> <span>Pesanan Saya</span>
+    </a>
+    <a href="<?= BASE_URL ?>/views/buyer/addresses.php" class="<?= $current === 'addresses.php' ? 'active' : '' ?>">
+      <i class="fa fa-map-marker-alt"></i> <span>Alamat Saya</span>
+    </a>
+    <a href="<?= BASE_URL ?>/views/buyer/cart.php" class="<?= $current === 'cart.php' ? 'active' : '' ?>">
+      <i class="fa fa-shopping-cart"></i> <span>Keranjang Saya</span>
+    </a>
+
+    <?php elseif ($role === 'public'): ?>
+    <a href="<?= BASE_URL ?>/index.php" class="<?= $current === 'index.php' || $current === '' ? 'active' : '' ?>">
+      <i class="fa fa-home"></i> <span>Beranda</span>
+    </a>
+    <a href="<?= BASE_URL ?>/views/public/login.php">
+      <i class="fa fa-sign-in-alt"></i> <span>Masuk</span>
+    </a>
+    <a href="<?= BASE_URL ?>/views/public/register.php">
+      <i class="fa fa-user-plus"></i> <span>Daftar</span>
+    </a>
     <?php endif; ?>
   </nav>
 
+  <?php if (isLoggedIn()): ?>
   <div class="sidebar-footer">
     <a href="<?= BASE_URL ?>/controllers/AuthController.php?action=logout" class="sidebar-logout">
       <i class="fa fa-sign-out-alt"></i> <span>Keluar</span>
     </a>
   </div>
+  <?php endif; ?>
 </aside>

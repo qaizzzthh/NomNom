@@ -1722,10 +1722,50 @@ footer a {
   background: var(--success);
 }
 
+/* Desktop: hide sidebar if page doesn't have sidebar */
+.no-sidebar .sidebar {
+  display: none;
+}
+
+/* Map Picker styling */
+.map-picker {
+  height: 280px;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  border: 1.5px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+/* Checkout Grid styling */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 768px) {
   .sidebar {
-    display: none;
+    display: flex !important;
+    position: fixed;
+    top: var(--navbar-h);
+    left: -280px;
+    width: 280px;
+    height: calc(100vh - var(--navbar-h));
+    z-index: 1001;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .checkout-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .main-content {

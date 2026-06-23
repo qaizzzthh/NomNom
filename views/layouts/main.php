@@ -15,13 +15,14 @@
 <link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>/assets/images/NomNom.id.svg">
 <?= $extraCSS ?? '' ?>
 </head>
-<body class="role-<?= $role ?? 'public' ?>">
+<body class="role-<?= $role ?? 'public' ?> <?= (isset($sidebar) && $sidebar) ? 'has-sidebar' : 'no-sidebar' ?>">
 <?php include __DIR__ . '/navbar.php'; ?>
 <div class="app-wrapper">
     <?php if (isset($sidebar) && $sidebar): ?>
     <?php include __DIR__ . '/sidebar.php'; ?>
     <main class="main-content with-sidebar">
     <?php else: ?>
+    <?php include __DIR__ . '/sidebar.php'; ?>
     <main class="main-content">
     <?php endif; ?>
 
